@@ -39,7 +39,7 @@ You first need to add a secret in the respective environment through the infisic
 > Note that infisical doesn't support nested secrets. The keys of the secrets need to include ":" to represent nested
 > keys in an `appsettings.json`.
 
-![Screenshot of Infisical with a secret called "ConnectionStrings:MyDatabase"](docs/example-screenshot.png)
+![Screenshot of Infisical with a secret called "ConnectionStrings:MyDatabase"](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/example-screenshot.png)
 
 Then, in code, you can inject `IConfiguration` in your class and access its value as if it was in your
 `appsettings.json`:
