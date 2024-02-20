@@ -9,6 +9,17 @@ public static class ConfigurationBuilderExtensions
     {
         var options = new InfisicalConfigurationOptions();
 
+        var tempConfig = builder.Build();
+        var infisicalConfigSection = tempConfig.GetRequiredSection("Infisical");
+        options.ClientId = infisicalConfigSection["ClientId"];
+        options.ClientSecret = infisicalConfigSection["ClientSecret"];
+        options.SiteUrl = infisicalConfigSection["SiteUrl"];
+        options.ProjectId = infisicalConfigSection["ProjectId"];
+        options.AccessToken = infisicalConfigSection["AccessToken"];
+        options.CacheTtl = infisicalConfigSection["CacheTtl"] is { } cacheTtl ? long.Parse(cacheTtl) : null;
+        options.UserAgent = infisicalConfigSection["UserAgent"];
+        options.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval ? long.Parse(pollingInterval) : null;
+
         configure(options);
 
         return builder.Add(new InfisicalConfigurationSource(options));
@@ -19,17 +30,6 @@ public static class ConfigurationBuilderExtensions
         return builder.AddInfisical(c =>
         {
             c.EnvironmentName = environment.EnvironmentName;
-
-            var tempConfig = builder.Build();
-            var infisicalConfigSection = tempConfig.GetRequiredSection("Infisical");
-            c.ClientId = infisicalConfigSection["ClientId"];
-            c.ClientSecret = infisicalConfigSection["ClientSecret"];
-            c.SiteUrl = infisicalConfigSection["SiteUrl"];
-            c.ProjectId = infisicalConfigSection["ProjectId"];
-            c.AccessToken = infisicalConfigSection["AccessToken"];
-            c.CacheTtl = infisicalConfigSection["CacheTtl"] is { } cacheTtl ? long.Parse(cacheTtl) : null;
-            c.UserAgent = infisicalConfigSection["UserAgent"];
-            c.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval ? long.Parse(pollingInterval) : null;
 
             configure?.Invoke(c);
         });
