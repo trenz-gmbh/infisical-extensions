@@ -8,11 +8,20 @@ public class Worker(IConfiguration configuration) : BackgroundService
         {
             Console.WriteLine($"Worker running at: {DateTime.Now}");
 
-            var foo = configuration["FOO"];
+            PrintRecursively(configuration);
 
-            Console.WriteLine($"FOO={foo}");
+            await Task.Delay(5000, stoppingToken);
+        }
+    }
 
-            await Task.Delay(1000, stoppingToken);
+    private static void PrintRecursively(IConfiguration section, int indent = 0)
+    {
+        var children = section.GetChildren().ToList();
+        foreach (var child in children)
+        {
+            Console.WriteLine($"{new string('\t', indent)}[{child.Key}]: {child.Value}");
+
+            PrintRecursively(child, indent + 1);
         }
     }
 }
