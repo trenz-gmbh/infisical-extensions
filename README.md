@@ -5,6 +5,13 @@ register it as a configuration provider in your .NET app.
 
 ## Usage
 
+Disable End-to-End encryption in your Infisical project settings. The .NET SDK does not support it yet:
+
+![Screenshot of disabled End-to-End Encryption checkbox](docs/disable-e2ee.png)
+
+> **Note**
+> While you're in the settings, we also recommend to disable "Auto Capitalization"
+
 Add your infisical settings to `appsettings.json`:
 
 ```json
