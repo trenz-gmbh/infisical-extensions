@@ -122,12 +122,20 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
     {
         parentPath ??= string.Empty;
+
         foreach (var key in secrets.Keys)
         {
             if (!key.StartsWith(parentPath))
                 continue;
 
-            yield return key[parentPath.Length..].Split(":").First();
+            var remainingPath = key[parentPath.Length..];
+            if (remainingPath.StartsWith(':'))
+                remainingPath = remainingPath[1..];
+
+            if (remainingPath.Length == 0)
+                continue;
+
+            yield return remainingPath.Split(":").First();
         }
     }
 
