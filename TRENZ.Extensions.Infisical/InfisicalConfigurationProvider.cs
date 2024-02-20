@@ -130,13 +130,13 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
                 continue;
 
             var remainingPath = key[parentPath.Length..];
-            if (remainingPath.StartsWith(':'))
+            if (remainingPath.StartsWith(ConfigurationPath.KeyDelimiter))
                 remainingPath = remainingPath[1..];
 
             if (remainingPath.Length == 0)
                 continue;
 
-            var currentKey = remainingPath.Split(":").First();
+            var currentKey = remainingPath.Split(ConfigurationPath.KeyDelimiter).First();
 
             if (returnedKeys.Add(currentKey))
                 yield return currentKey;
