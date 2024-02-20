@@ -20,9 +20,9 @@ public class InfisicalConfigurationProvider(InfisicalConfigurationOptions option
             ClientId = options.ClientId ?? throw new InfisicalException("ClientId is not set."),
             ClientSecret = options.ClientSecret ?? throw new InfisicalException("ClientSecret is not set."),
             SiteUrl = options.SiteUrl ?? throw new InfisicalException("SiteUrl is not set."),
-            UserAgent = options.UserAgent ?? "InfisicalConfigurationProvider",
+            UserAgent = options.UserAgent!,
             CacheTtl = options.CacheTtl,
-            AccessToken = options.AccessToken ?? string.Empty,
+            AccessToken = options.AccessToken!,
         };
 
         return new(settings);
