@@ -123,6 +123,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         parentPath ??= string.Empty;
 
+        var returnedKeys = new HashSet<string>();
         foreach (var key in secrets.Keys)
         {
             if (!key.StartsWith(parentPath))
@@ -135,7 +136,10 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
             if (remainingPath.Length == 0)
                 continue;
 
-            yield return remainingPath.Split(":").First();
+            var currentKey = remainingPath.Split(":").First();
+
+            if (returnedKeys.Add(currentKey))
+                yield return currentKey;
         }
     }
 
