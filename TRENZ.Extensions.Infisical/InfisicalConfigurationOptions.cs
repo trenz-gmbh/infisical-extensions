@@ -17,4 +17,6 @@ public class InfisicalConfigurationOptions
     public long? CacheTtl { get; set; }
 
     public string? UserAgent { get; set; }
+
+    public long? PollingInterval { get; set; }
 }

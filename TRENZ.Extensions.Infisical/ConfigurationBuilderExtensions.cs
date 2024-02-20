@@ -26,6 +26,10 @@ public static class ConfigurationBuilderExtensions
             c.ClientSecret = infisicalConfigSection["ClientSecret"];
             c.SiteUrl = infisicalConfigSection["SiteUrl"];
             c.ProjectId = infisicalConfigSection["ProjectId"];
+            c.AccessToken = infisicalConfigSection["AccessToken"];
+            c.CacheTtl = infisicalConfigSection["CacheTtl"] is { } cacheTtl ? long.Parse(cacheTtl) : null;
+            c.UserAgent = infisicalConfigSection["UserAgent"];
+            c.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval ? long.Parse(pollingInterval) : null;
 
             configure?.Invoke(c);
         });
