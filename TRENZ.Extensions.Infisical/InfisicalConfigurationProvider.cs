@@ -17,7 +17,6 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private CancellationTokenSource reloadTokenSource = new();
 
-
     public InfisicalConfigurationProvider(InfisicalConfigurationOptions options)
     {
         this.options = options;
@@ -133,6 +132,15 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
     {
         parentPath ??= string.Empty;
+
+        foreach (var earlierKey in earlierKeys)
+        {
+            // omit all infisical keys
+            if (parentPath.Length == 0 && earlierKey.StartsWith("Infisical"))
+                continue;
+
+            yield return earlierKey;
+        }
 
         var returnedKeys = new HashSet<string>();
         foreach (var key in secrets.Keys)
