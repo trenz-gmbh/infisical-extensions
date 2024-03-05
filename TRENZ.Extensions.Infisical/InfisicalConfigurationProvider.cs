@@ -52,8 +52,6 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         }
     }
 
-    private string ProjectId => options.ProjectId ?? throw new InfisicalException("ProjectId is not set.");
-
     private string EnvironmentName => options.EnvironmentName.ToLowerInvariant();
 
     private InfisicalClient Client => lazyClient.Value;
@@ -119,10 +117,14 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private FrozenDictionary<string, SecretElement> LoadSecrets()
     {
+        var projectId = options.ProjectId;
+        if (string.IsNullOrEmpty(projectId))
+            throw new InfisicalException("ProjectId is not set.");
+
         var request = new ListSecretsOptions
         {
             Environment = EnvironmentName,
-            ProjectId = ProjectId,
+            ProjectId = projectId,
         };
 
         return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
