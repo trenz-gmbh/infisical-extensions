@@ -1,3 +1,8 @@
+# 1.0.3
+
+- Fixed issue where no keys from `appsettings.json` where available after adding infisical
+  - Now, all keys except `Infisical:*` are available
+
 # 1.0.2
 
 - Better handling for nested child keys
