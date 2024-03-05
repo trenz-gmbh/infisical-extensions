@@ -24,11 +24,20 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
         lazyClient = new(() =>
         {
+            if (string.IsNullOrEmpty(options.ClientId))
+                throw new InfisicalException("ClientId is not set.");
+
+            if (string.IsNullOrEmpty(options.ClientSecret))
+                throw new InfisicalException("ClientSecret is not set.");
+
+            if (string.IsNullOrEmpty(options.SiteUrl))
+                throw new InfisicalException("SiteUrl is not set.");
+
             var settings = new ClientSettings
             {
-                ClientId = options.ClientId ?? throw new InfisicalException("ClientId is not set."),
-                ClientSecret = options.ClientSecret ?? throw new InfisicalException("ClientSecret is not set."),
-                SiteUrl = options.SiteUrl ?? throw new InfisicalException("SiteUrl is not set."),
+                ClientId = options.ClientId,
+                ClientSecret = options.ClientSecret,
+                SiteUrl = options.SiteUrl,
                 UserAgent = options.UserAgent!,
                 CacheTtl = options.CacheTtl,
                 AccessToken = options.AccessToken!,
