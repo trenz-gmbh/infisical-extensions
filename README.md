@@ -17,9 +17,9 @@ Add your infisical settings to `appsettings.json`:
 ```json
 {
   "Infisical": {
+    "SiteUrl": "https://<your infisical host>",
     "ClientId": "07ebc18f-df32-475a-8fef-1bdd79a5c7ac",
     "ClientSecret": "insert-your-client-secret",
-    "SiteUrl": "https://<your infisical host>",
     "ProjectId": "some-project-id"
   }
 }
@@ -36,6 +36,9 @@ builder.AddInfisicalConfiguration();
 ```
 
 This will add a `InfisicalConfigurationProvider` that provides all available secrets through `IConfiguration`.
+
+> **Note**
+> The provider drops all keys in the "Infisical" object to protect your infisical credentials.
 
 ---
 
@@ -65,6 +68,44 @@ You could also access the key directly using:
 ```csharp
 var connectionString = configuration["ConnectionStrings:MyDatabase"];
 ```
+
+## Polling for changes
+
+You can let this provider regularly poll Infisical for changes.
+This is useful if you want to update your secrets without restarting your application.
+
+To enable polling, you can set the `Infisical:PollingInterval` key in your `appsettings.json`:
+
+```json
+{
+  "Infisical": {
+    ...
+    "PollingInterval": 10000
+  }
+}
+```
+
+This value is the interval in milliseconds in which the provider will poll Infisical for changes.
+To disable polling, just remove the key from your configuration.
+
+The default is to not poll for changes.
+
+## Load timeout
+
+You can set the `Infisical:LoadTimeout` key in your `appsettings.json` to specify the maximum time the provider will
+wait for the initial (and subsequent) loads of the secrets.
+
+```json
+{
+  "Infisical": {
+    ...
+    "LoadTimeout": 10000
+  }
+}
+```
+
+The default timeout is `5000` (5s).
+To disable the timeout, set the value to `-1`.
 
 ## Installation
 
