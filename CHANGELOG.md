@@ -1,3 +1,7 @@
+# 1.0.5
+
+- Package now includes source link to GitHub sources
+
 # 1.0.4
 
 - Added `LoadTimeout` to specify the timeout for loading secrets from Infisical
