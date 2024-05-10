@@ -19,4 +19,6 @@ public class InfisicalConfigurationOptions
     public string? UserAgent { get; set; }
 
     public long? PollingInterval { get; set; }
+
+    public long? LoadTimeout { get; set; }
 }

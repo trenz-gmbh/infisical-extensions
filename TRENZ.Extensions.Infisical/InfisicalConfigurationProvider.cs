@@ -21,7 +21,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         this.options = options;
 
-        lazyClient = new(() =>
+        lazyClient = new Lazy<InfisicalClient>(() =>
         {
             if (string.IsNullOrEmpty(options.ClientId))
                 throw new InfisicalException("ClientId is not set.");
@@ -42,12 +42,12 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
                 AccessToken = options.AccessToken!,
             };
 
-            return new(settings);
+            return new InfisicalClient(settings);
         });
 
         if (options.PollingInterval is { } pollingInterval)
         {
-            checkForChangesTimer = new(CheckForChanges, null, pollingInterval, pollingInterval);
+            checkForChangesTimer = new Timer(CheckForChanges, null, pollingInterval, pollingInterval);
         }
     }
 
@@ -55,17 +55,33 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private InfisicalClient Client => lazyClient.Value;
 
+    private TimeSpan LoadTimeout
+    {
+        get
+        {
+            return options.LoadTimeout switch
+            {
+                null => TimeSpan.FromSeconds(5),
+                < 0 => Timeout.InfiniteTimeSpan,
+                _ => TimeSpan.FromMilliseconds(options.LoadTimeout.Value),
+            };
+        }
+    }
+
     private void CheckForChanges(object? state)
     {
-        if (!CheckHasChanged())
-            return;
+        LoadSecretsWithTimeout(newSecrets =>
+        {
+            if (!CheckHasChanged(newSecrets))
+                return;
 
-        var previousToken = reloadTokenSource;
+            var previousToken = reloadTokenSource;
 
-        Load();
-        reloadTokenSource = new();
+            Load();
+            reloadTokenSource = new CancellationTokenSource();
 
-        previousToken.Cancel();
+            previousToken.Cancel();
+        }, LoadTimeout);
     }
 
     public bool TryGet(string key, out string? value)
@@ -91,12 +107,11 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     public void Load()
     {
-        secrets = LoadSecrets();
+        LoadSecretsWithTimeout(s => secrets = s, LoadTimeout);
     }
 
-    private bool CheckHasChanged()
+    private bool CheckHasChanged(IDictionary<string, SecretElement> newSecrets)
     {
-        var newSecrets = LoadSecrets();
         var oldSecrets = secrets;
 
         if (newSecrets.Count != oldSecrets.Count)
@@ -114,6 +129,13 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         return false;
     }
 
+    private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>> callback, TimeSpan timeout)
+    {
+        var task = Task.Run(() => callback(LoadSecrets()));
+        if (!task.Wait(timeout))
+            throw new InfisicalException("Timeout while loading secrets.");
+    }
+
     private FrozenDictionary<string, SecretElement> LoadSecrets()
     {
         var projectId = options.ProjectId;
@@ -126,7 +148,14 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
             ProjectId = projectId,
         };
 
-        return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+        try
+        {
+            return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+        }
+        catch (InfisicalException e)
+        {
+            throw new InfisicalException("Failed to load secrets.", e);
+        }
     }
 
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
