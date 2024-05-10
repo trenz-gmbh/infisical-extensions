@@ -1,3 +1,7 @@
+# 1.0.4
+
+- Added `LoadTimeout` to specify the timeout for loading secrets from Infisical
+
 # 1.0.3
 
 - Fixed issue where no keys from `appsettings.json` where available after adding infisical
