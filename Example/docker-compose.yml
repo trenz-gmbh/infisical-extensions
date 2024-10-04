@@ -1,12 +1,30 @@
 version: "3"
 
 services:
+  db-migration:
+    container_name: infisical-db-migration
+    depends_on:
+      db:
+        condition: service_healthy
+    image: infisical/infisical:latest-postgres
+    env_file: .env
+    command: npm run migration:latest
+    pull_policy: always
+    networks:
+      - infisical
+
   backend:
     container_name: infisical-backend
     restart: unless-stopped
     depends_on:
-      - mongo
-    image: infisical/infisical:latest
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      db-migration:
+        condition: service_completed_successfully
+    image: infisical/infisical:latest-postgres
+    pull_policy: always
     env_file: .env
     ports:
       - "8080:8080"
@@ -22,27 +40,29 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - "6379:6379"
+      - 6379:6379
     networks:
       - infisical
     volumes:
       - redis_data:/data
 
-  mongo:
-    container_name: infisical-mongo
-    image: mongo
+  db:
+    container_name: infisical-db
+    image: postgres:14-alpine
     restart: always
     env_file: .env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
-      - mongo-data:/data/db
+      - pg_data:/var/lib/postgresql/data
     networks:
       - infisical
+    healthcheck:
+      test: "pg_isready --username=${POSTGRES_USER} && psql --username=${POSTGRES_USER} --list"
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
 volumes:
-  mongo-data:
+  pg_data:
     driver: local
   redis_data:
     driver: local
