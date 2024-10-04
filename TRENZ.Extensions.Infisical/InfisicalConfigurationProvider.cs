@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics;
 using Infisical.Sdk;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
@@ -52,6 +53,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     }
 
     private string EnvironmentName => options.EnvironmentName.ToLowerInvariant();
+
+    private bool PropagateExceptions => options.PropagateExceptions ?? true;
 
     private InfisicalClient Client => lazyClient.Value;
 
@@ -107,7 +110,17 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     public void Load()
     {
-        LoadSecretsWithTimeout(s => secrets = s, LoadTimeout);
+        try
+        {
+            LoadSecretsWithTimeout(s => secrets = s, LoadTimeout);
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine($"Failed to load secrets: {e}");
+
+            if (PropagateExceptions)
+                throw;
+        }
     }
 
     private bool CheckHasChanged(IDictionary<string, SecretElement> newSecrets)
@@ -170,6 +183,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
             }
             catch (InfisicalException e)
             {
+                Debug.WriteLine($"Failed to load secrets: {e}");
+
                 retries++;
                 if (retries >= maxRetries)
                     throw new InfisicalException("Max retries exceeded.", e);
