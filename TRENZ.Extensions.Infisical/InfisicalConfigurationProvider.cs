@@ -138,6 +138,18 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private FrozenDictionary<string, SecretElement> LoadSecrets()
     {
+        try
+        {
+            return LoadSecretsWithRetries();
+        }
+        catch (InfisicalException e)
+        {
+            throw new InfisicalException("Failed to load secrets.", e);
+        }
+    }
+
+    private FrozenDictionary<string, SecretElement> LoadSecretsWithRetries()
+    {
         var projectId = options.ProjectId;
         if (string.IsNullOrEmpty(projectId))
             throw new InfisicalException("ProjectId is not set.");
@@ -148,13 +160,24 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
             ProjectId = projectId,
         };
 
-        try
+        const int maxRetries = 10;
+        var retries = 0;
+        while (true)
         {
-            return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
-        }
-        catch (InfisicalException e)
-        {
-            throw new InfisicalException("Failed to load secrets.", e);
+            try
+            {
+                return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+            }
+            catch (InfisicalException e)
+            {
+                retries++;
+                if (retries >= maxRetries)
+                    throw new InfisicalException("Max retries exceeded.", e);
+
+                // back off exponentially but at least 50ms
+                var backoff = 50 + 5 * Math.Pow(2, retries);
+                Thread.Sleep((int)backoff);
+            }
         }
     }
 
