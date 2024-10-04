@@ -1,3 +1,9 @@
+# 1.0.6
+
+- You can now set a `PropagateExceptions` boolean to specify whether errors while loading the secrets should be propagated or suppressed
+- Added exponential backoff for failed requests (max 10 failed requests; the `LoadTimeout` has precedence)
+- Updated to the latest Infisical SDK
+
 # 1.0.5
 
 - Package now includes source link to GitHub sources
