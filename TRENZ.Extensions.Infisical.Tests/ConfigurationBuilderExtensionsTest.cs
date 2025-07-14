@@ -52,11 +52,11 @@ public class ConfigureBuilderExtensionsTest
 
         builderMock.Object.AddInfisical(ConfigureCallback);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(called, Is.True);
             Assert.That(args, Is.Not.Empty);
-        });
+        }
 
         builderMock.VerifyAll();
 
@@ -95,7 +95,8 @@ public class ConfigureBuilderExtensionsTest
         });
 
         Assert.That(options, Is.Not.Null);
-        Assert.Multiple(() =>
+
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(options!.EnvironmentName, Is.EqualTo("Development"));
             Assert.That(options.ClientId, Is.EqualTo("clientId"));
@@ -106,7 +107,7 @@ public class ConfigureBuilderExtensionsTest
             Assert.That(options.CacheTtl, Is.EqualTo(1000));
             Assert.That(options.UserAgent, Is.EqualTo("userAgent"));
             Assert.That(options.PollingInterval, Is.EqualTo(1000));
-        });
+        }
 
         builderMock.VerifyAll();
     }
