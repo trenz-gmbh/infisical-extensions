@@ -1,11 +1,16 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TRENZ.Extensions.Infisical;
 
 public static class ConfigurationBuilderExtensions
 {
-    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder, Action<InfisicalConfigurationOptions> configure)
+    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder,
+        Action<InfisicalConfigurationOptions> configure) => AddInfisical(builder, (ILoggerFactory?)null, configure);
+
+    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder, ILoggerFactory? loggerFactory,
+        Action<InfisicalConfigurationOptions> configure)
     {
         var options = new InfisicalConfigurationOptions();
 
@@ -18,16 +23,22 @@ public static class ConfigurationBuilderExtensions
         options.AccessToken = infisicalConfigSection["AccessToken"];
         options.CacheTtl = infisicalConfigSection["CacheTtl"] is { } cacheTtl ? long.Parse(cacheTtl) : null;
         options.UserAgent = infisicalConfigSection["UserAgent"];
-        options.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval ? long.Parse(pollingInterval) : null;
+        options.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval
+            ? long.Parse(pollingInterval)
+            : null;
 
         configure(options);
 
-        return builder.Add(new InfisicalConfigurationSource(options));
+        return builder.Add(new InfisicalConfigurationSource(options, loggerFactory));
     }
 
-    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder, IHostEnvironment environment, Action<InfisicalConfigurationOptions>? configure = null)
+    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder, IHostEnvironment environment,
+        Action<InfisicalConfigurationOptions>? configure = null) => AddInfisical(builder, environment, null, configure);
+
+    public static IConfigurationBuilder AddInfisical(this IConfigurationBuilder builder, IHostEnvironment environment,
+        ILoggerFactory? loggerFactory, Action<InfisicalConfigurationOptions>? configure = null)
     {
-        return builder.AddInfisical(c =>
+        return builder.AddInfisical(loggerFactory, c =>
         {
             c.EnvironmentName = environment.EnvironmentName;
 

@@ -1,14 +1,15 @@
-using System.Collections.Frozen;
-using System.Diagnostics;
 using Infisical.Sdk;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace TRENZ.Extensions.Infisical;
 
 public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposable
 {
-    private readonly Lazy<InfisicalClient> lazyClient;
+    private readonly ILogger<InfisicalConfigurationProvider>? logger;
+
+    private readonly IInfisicalClientWrapper client;
 
     private readonly Timer? checkForChangesTimer;
 
@@ -18,45 +19,18 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private CancellationTokenSource reloadTokenSource = new();
 
-    public InfisicalConfigurationProvider(InfisicalConfigurationOptions options)
+    public InfisicalConfigurationProvider(ILogger<InfisicalConfigurationProvider>? logger,
+        InfisicalConfigurationOptions options, IInfisicalClientWrapper client)
     {
+        this.logger = logger;
         this.options = options;
-
-        lazyClient = new Lazy<InfisicalClient>(() =>
-        {
-            if (string.IsNullOrEmpty(options.ClientId))
-                throw new InfisicalException("ClientId is not set.");
-
-            if (string.IsNullOrEmpty(options.ClientSecret))
-                throw new InfisicalException("ClientSecret is not set.");
-
-            if (string.IsNullOrEmpty(options.SiteUrl))
-                throw new InfisicalException("SiteUrl is not set.");
-
-            var settings = new ClientSettings
-            {
-                ClientId = options.ClientId,
-                ClientSecret = options.ClientSecret,
-                SiteUrl = options.SiteUrl,
-                UserAgent = options.UserAgent!,
-                CacheTtl = options.CacheTtl,
-                AccessToken = options.AccessToken!,
-            };
-
-            return new InfisicalClient(settings);
-        });
+        this.client = client;
 
         if (options.PollingInterval is { } pollingInterval)
         {
             checkForChangesTimer = new Timer(CheckForChanges, null, pollingInterval, pollingInterval);
         }
     }
-
-    private string EnvironmentName => options.EnvironmentName.ToLowerInvariant();
-
-    private bool PropagateExceptions => options.PropagateExceptions ?? true;
-
-    private InfisicalClient Client => lazyClient.Value;
 
     private TimeSpan LoadTimeout
     {
@@ -75,6 +49,9 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         LoadSecretsWithTimeout(newSecrets =>
         {
+            if (newSecrets == null) // secret loading failed, handle gracefully
+                return;
+
             if (!CheckHasChanged(newSecrets))
                 return;
 
@@ -110,17 +87,13 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     public void Load()
     {
-        try
+        LoadSecretsWithTimeout(s =>
         {
-            LoadSecretsWithTimeout(s => secrets = s, LoadTimeout);
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine($"Failed to load secrets: {e}");
+            if (s == null)
+                return;
 
-            if (PropagateExceptions)
-                throw;
-        }
+            secrets = s;
+        }, LoadTimeout);
     }
 
     private bool CheckHasChanged(IDictionary<string, SecretElement> newSecrets)
@@ -142,57 +115,17 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         return false;
     }
 
-    private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>> callback, TimeSpan timeout)
-    {
-        var task = Task.Run(() => callback(LoadSecrets()));
-        if (!task.Wait(timeout))
-            throw new InfisicalException("Timeout while loading secrets.");
-    }
-
-    private FrozenDictionary<string, SecretElement> LoadSecrets()
+    private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>?> callback, TimeSpan timeout)
     {
         try
         {
-            return LoadSecretsWithRetries();
+            var task = Task.Run(() => callback(client.GetAll()));
+
+            _ = task.Wait(timeout);
         }
-        catch (InfisicalException e)
+        catch (Exception e)
         {
-            throw new InfisicalException("Failed to load secrets.", e);
-        }
-    }
-
-    private FrozenDictionary<string, SecretElement> LoadSecretsWithRetries()
-    {
-        var projectId = options.ProjectId;
-        if (string.IsNullOrEmpty(projectId))
-            throw new InfisicalException("ProjectId is not set.");
-
-        var request = new ListSecretsOptions
-        {
-            Environment = EnvironmentName,
-            ProjectId = projectId,
-        };
-
-        const int maxRetries = 10;
-        var retries = 0;
-        while (true)
-        {
-            try
-            {
-                return Client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
-            }
-            catch (InfisicalException e)
-            {
-                Debug.WriteLine($"Failed to load secrets: {e}");
-
-                retries++;
-                if (retries >= maxRetries)
-                    throw new InfisicalException("Max retries exceeded.", e);
-
-                // back off exponentially but at least 50ms
-                var backoff = 50 + 5 * Math.Pow(2, retries);
-                Thread.Sleep((int)backoff);
-            }
+            logger?.LogWarning(e, "Failed loading secrets with timeout ({Timeout})", timeout);
         }
     }
 
@@ -233,9 +166,13 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         checkForChangesTimer?.Dispose();
 
-        if (!lazyClient.IsValueCreated)
-            return;
+        reloadTokenSource.Dispose();
 
-        lazyClient.Value.Dispose();
+        if (logger is IDisposable d)
+            d.Dispose();
+
+        secrets.Clear();
+
+        GC.SuppressFinalize(this);
     }
 }

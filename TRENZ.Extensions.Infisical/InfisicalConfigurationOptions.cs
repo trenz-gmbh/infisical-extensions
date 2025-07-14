@@ -21,6 +21,4 @@ public class InfisicalConfigurationOptions
     public long? PollingInterval { get; set; }
 
     public long? LoadTimeout { get; set; }
-
-    public bool? PropagateExceptions { get; set; }
 }
