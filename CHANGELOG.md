@@ -1,3 +1,8 @@
+# Unreleased
+
+- Updated dependencies
+- Always handle errors gracefully (removed `PropagateExceptions`)
+
 # 1.0.6
 
 - You can now set a `PropagateExceptions` boolean to specify whether errors while loading the secrets should be propagated or suppressed
