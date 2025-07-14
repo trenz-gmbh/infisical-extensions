@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using Infisical.Sdk;
 
 namespace TRENZ.Extensions.Infisical;
@@ -10,6 +11,7 @@ public class UnderscoreToColonMappingInfisicalClientWrapper(IInfisicalClientWrap
         if (all == null)
             return null;
 
+        var newEntries = new Dictionary<string, SecretElement>();
         foreach (var k in all.Keys)
         {
             if (!k.Contains("__"))
@@ -18,9 +20,9 @@ public class UnderscoreToColonMappingInfisicalClientWrapper(IInfisicalClientWrap
             var mappedKey = k.Replace("__", ":");
 
             // clone secret with new key
-            all[mappedKey] = all[k];
+            newEntries[mappedKey] = all[k];
         }
 
-        return all;
+        return FrozenDictionary.ToFrozenDictionary([..all, ..newEntries]);
     }
 }
