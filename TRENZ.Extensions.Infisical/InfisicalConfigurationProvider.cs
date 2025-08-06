@@ -117,17 +117,16 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>?> callback, TimeSpan timeout)
     {
-        var loadTask = client.GetAllSecretsAsync(CancellationToken.None);
-
-        if (loadTask.Wait(timeout))
+        try
         {
-            if (loadTask.IsCompletedSuccessfully)
-                callback(loadTask.Result);
-            else
-                logger?.LogWarning(loadTask.Exception, "Failed loading secrets");
+            var task = Task.Run(() => callback(client.GetAllSecrets()));
+
+            _ = task.Wait(timeout);
         }
-        else
-            logger?.LogWarning("Failed loading secrets (timed out after {Timeout})", timeout);
+        catch (Exception e)
+        {
+            logger?.LogWarning(e, "Failed loading secrets with timeout ({Timeout})", timeout);
+        }
     }
 
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)

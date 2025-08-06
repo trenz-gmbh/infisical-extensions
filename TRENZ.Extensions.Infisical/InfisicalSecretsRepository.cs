@@ -55,8 +55,7 @@ public class InfisicalSecretsRepository(
         GC.SuppressFinalize(this);
     }
 
-    public async Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(
-        CancellationToken cancellationToken = default)
+    public IDictionary<string, SecretElement>? GetAllSecrets()
     {
         var request = new ListSecretsOptions
         {
@@ -84,9 +83,9 @@ public class InfisicalSecretsRepository(
                     return null;
                 }
 
-                // back off exponentially, but at least 50ms
+                // back off exponentially but at least 50ms
                 var backoff = 50 + 5 * Math.Pow(2, retries);
-                await Task.Delay(TimeSpan.FromMilliseconds(backoff), cancellationToken);
+                Thread.Sleep((int)backoff);
             }
         }
     }

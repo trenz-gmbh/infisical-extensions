@@ -4,5 +4,5 @@ namespace TRENZ.Extensions.Infisical;
 
 public interface ISecretsRepository
 {
-    Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(CancellationToken cancellationToken = default);
+    IDictionary<string, SecretElement>? GetAllSecrets();
 }
