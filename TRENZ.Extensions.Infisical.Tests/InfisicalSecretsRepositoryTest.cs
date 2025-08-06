@@ -4,7 +4,7 @@ namespace TRENZ.Extensions.Infisical.Tests;
 
 public static class InfisicalSecretsRepositoryTest
 {
-    private static InfisicalConfigurationOptions CompleteConfig => new()
+    private static InfisicalConfigurationOptions GenerateCompleteConfig() => new()
     {
         UserAgent = "userAgent",
         AccessToken = "accessToken",
@@ -23,7 +23,7 @@ public static class InfisicalSecretsRepositoryTest
     {
         Assert.DoesNotThrow(() =>
         {
-            _ = new InfisicalSecretsRepository(null, CompleteConfig);
+            _ = new InfisicalSecretsRepository(null, GenerateCompleteConfig());
         });
     }
 
@@ -32,9 +32,9 @@ public static class InfisicalSecretsRepositoryTest
     {
         Assert.DoesNotThrow(() =>
         {
-            var cloned = CompleteConfig.Clone();
-            cloned.SiteUrl = "https://siteUrl/";
-            _ = new InfisicalSecretsRepository(null, cloned);
+            var config = GenerateCompleteConfig();
+            config.SiteUrl = "https://siteUrl/";
+            _ = new InfisicalSecretsRepository(null, config);
         });
     }
 
@@ -43,9 +43,9 @@ public static class InfisicalSecretsRepositoryTest
     {
         Assert.DoesNotThrow(() =>
         {
-            var cloned = CompleteConfig.Clone();
-            cloned.UserAgent = null;
-            _ = new InfisicalSecretsRepository(null, cloned);
+            var config = GenerateCompleteConfig();
+            config.UserAgent = null;
+            _ = new InfisicalSecretsRepository(null, config);
         });
     }
 
@@ -54,9 +54,9 @@ public static class InfisicalSecretsRepositoryTest
     {
         var e = Assert.Throws<InfisicalException>(() =>
         {
-            var cloned = CompleteConfig.Clone();
-            cloned.SiteUrl = string.Empty;
-            _ = new InfisicalSecretsRepository(null, cloned);
+            var config = GenerateCompleteConfig();
+            config.SiteUrl = string.Empty;
+            _ = new InfisicalSecretsRepository(null, config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl is not set."));
@@ -67,9 +67,9 @@ public static class InfisicalSecretsRepositoryTest
     {
         var e = Assert.Throws<InfisicalException>(() =>
         {
-            var cloned = CompleteConfig.Clone();
-            cloned.SiteUrl = "httpsiteUrl";
-            _ = new InfisicalSecretsRepository(null, cloned);
+            var config = GenerateCompleteConfig();
+            config.SiteUrl = "httpsiteUrl";
+            _ = new InfisicalSecretsRepository(null, config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl must use HTTPS scheme"));

@@ -1,6 +1,6 @@
 namespace TRENZ.Extensions.Infisical;
 
-public class InfisicalConfigurationOptions : ICloneable
+public class InfisicalConfigurationOptions
 {
     public string EnvironmentName { get; set; } = "Development";
 
@@ -23,23 +23,4 @@ public class InfisicalConfigurationOptions : ICloneable
     public long? LoadTimeout { get; set; }
 
     public bool? DisableDoubleUnderscoreToColonMapping { get; set; }
-
-    object ICloneable.Clone() => Clone();
-
-    public InfisicalConfigurationOptions Clone()
-    {
-        return new()
-        {
-            EnvironmentName = EnvironmentName,
-            SiteUrl = SiteUrl,
-            ClientId = ClientId,
-            ClientSecret = ClientSecret,
-            ProjectId = ProjectId,
-            AccessToken = AccessToken,
-            CacheTtl = CacheTtl,
-            UserAgent = UserAgent,
-            PollingInterval = PollingInterval,
-            LoadTimeout = LoadTimeout,
-        };
-    }
 }
