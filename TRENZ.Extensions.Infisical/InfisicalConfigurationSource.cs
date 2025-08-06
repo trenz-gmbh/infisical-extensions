@@ -10,11 +10,11 @@ public class InfisicalConfigurationSource(InfisicalConfigurationOptions options,
         var providerLogger = loggerFactory?.CreateLogger<InfisicalConfigurationProvider>();
         var clientWrapperLogger = loggerFactory?.CreateLogger<InfisicalSecretsRepository>();
 
-        var defaultClientWrapper = new InfisicalSecretsRepository(clientWrapperLogger, options);
+        ISecretsRepository repository = new InfisicalSecretsRepository(clientWrapperLogger, options);
 
-        if (options.DisableDoubleUnderscoreToColonMapping ?? false)
-            clientWrapper = new UnderscoreToColonMappingInfisicalClientWrapper(clientWrapper);
+        if (!(options.DisableDoubleUnderscoreToColonMapping ?? false))
+            repository = new DoubleUnderscoreToColonMappingSecretsRepository(repository);
 
-        return new InfisicalConfigurationProvider(providerLogger, options, clientWrapper);
+        return new InfisicalConfigurationProvider(providerLogger, options, repository);
     }
 }

@@ -3,11 +3,11 @@ using Infisical.Sdk;
 
 namespace TRENZ.Extensions.Infisical;
 
-public class UnderscoreToColonMappingInfisicalClientWrapper(IInfisicalClientWrapper inner) : IInfisicalClientWrapper
+public class DoubleUnderscoreToColonMappingSecretsRepository(ISecretsRepository inner) : ISecretsRepository
 {
-    public IDictionary<string, SecretElement>? GetAll()
+    public async Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(CancellationToken cancellationToken = default)
     {
-        var allSecrets = inner.GetAll();
+        var allSecrets = await inner.GetAllSecretsAsync(cancellationToken);
         if (allSecrets == null)
             return null;
 
