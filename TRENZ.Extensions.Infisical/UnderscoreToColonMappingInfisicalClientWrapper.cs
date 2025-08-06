@@ -7,22 +7,22 @@ public class UnderscoreToColonMappingInfisicalClientWrapper(IInfisicalClientWrap
 {
     public IDictionary<string, SecretElement>? GetAll()
     {
-        var all = inner.GetAll();
-        if (all == null)
+        var allSecrets = inner.GetAll();
+        if (allSecrets == null)
             return null;
 
         var newEntries = new Dictionary<string, SecretElement>();
-        foreach (var k in all.Keys)
+        foreach (var key in allSecrets.Keys)
         {
-            if (!k.Contains("__"))
+            if (!key.Contains("__"))
                 continue;
 
-            var mappedKey = k.Replace("__", ":");
+            var mappedKey = key.Replace("__", ":");
 
             // clone secret with new key
-            newEntries[mappedKey] = all[k];
+            newEntries[mappedKey] = allSecrets[key];
         }
 
-        return FrozenDictionary.ToFrozenDictionary([..all, ..newEntries]);
+        return FrozenDictionary.ToFrozenDictionary([..allSecrets, ..newEntries]);
     }
 }
