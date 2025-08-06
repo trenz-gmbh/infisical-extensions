@@ -9,7 +9,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 {
     private readonly ILogger<InfisicalConfigurationProvider>? logger;
 
-    private readonly IInfisicalClientWrapper client;
+    private readonly ISecretsRepository client;
 
     private readonly Timer? checkForChangesTimer;
 
@@ -20,7 +20,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     private CancellationTokenSource reloadTokenSource = new();
 
     public InfisicalConfigurationProvider(ILogger<InfisicalConfigurationProvider>? logger,
-        InfisicalConfigurationOptions options, IInfisicalClientWrapper client)
+        InfisicalConfigurationOptions options, ISecretsRepository client)
     {
         this.logger = logger;
         this.options = options;

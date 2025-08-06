@@ -8,9 +8,9 @@ public class InfisicalConfigurationSource(InfisicalConfigurationOptions options,
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
         var providerLogger = loggerFactory?.CreateLogger<InfisicalConfigurationProvider>();
-        var clientWrapperLogger = loggerFactory?.CreateLogger<DefaultInfisicalClientWrapper>();
+        var clientWrapperLogger = loggerFactory?.CreateLogger<InfisicalSecretsRepository>();
 
-        var defaultClientWrapper = new DefaultInfisicalClientWrapper(clientWrapperLogger, options);
+        var defaultClientWrapper = new InfisicalSecretsRepository(clientWrapperLogger, options);
 
         return new InfisicalConfigurationProvider(providerLogger, options, defaultClientWrapper);
     }

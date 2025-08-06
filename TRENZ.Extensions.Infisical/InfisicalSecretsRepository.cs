@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace TRENZ.Extensions.Infisical;
 
-public class DefaultInfisicalClientWrapper(
-    ILogger<DefaultInfisicalClientWrapper>? logger,
+public class InfisicalSecretsRepository(
+    ILogger<InfisicalSecretsRepository>? logger,
     InfisicalConfigurationOptions options
-) : IInfisicalClientWrapper, IDisposable
+) : ISecretsRepository, IDisposable
 {
     [MustDisposeResource]
     private static InfisicalClient CreateClientFromOptions(InfisicalConfigurationOptions options)
