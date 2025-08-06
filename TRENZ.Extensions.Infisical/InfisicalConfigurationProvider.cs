@@ -119,7 +119,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         try
         {
-            var task = Task.Run(() => callback(client.GetAll()));
+            var task = Task.Run(() => callback(client.GetAllSecrets()));
 
             _ = task.Wait(timeout);
         }

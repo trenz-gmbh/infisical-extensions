@@ -55,7 +55,7 @@ public class DefaultInfisicalClientWrapper(
         GC.SuppressFinalize(this);
     }
 
-    public IDictionary<string, SecretElement>? GetAll()
+    public IDictionary<string, SecretElement>? GetAllSecrets()
     {
         var request = new ListSecretsOptions
         {

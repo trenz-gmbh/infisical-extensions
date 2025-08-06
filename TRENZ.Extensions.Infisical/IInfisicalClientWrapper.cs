@@ -4,5 +4,5 @@ namespace TRENZ.Extensions.Infisical;
 
 public interface IInfisicalClientWrapper
 {
-    IDictionary<string, SecretElement>? GetAll();
+    IDictionary<string, SecretElement>? GetAllSecrets();
 }
