@@ -5,9 +5,9 @@ namespace TRENZ.Extensions.Infisical;
 
 public class DoubleUnderscoreToColonMappingSecretsRepository(ISecretsRepository inner) : ISecretsRepository
 {
-    public async Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(CancellationToken cancellationToken = default)
+    public IDictionary<string, SecretElement>? GetAllSecrets()
     {
-        var allSecrets = await inner.GetAllSecretsAsync(cancellationToken);
+        var allSecrets = inner.GetAllSecrets();
         if (allSecrets == null)
             return null;
 
