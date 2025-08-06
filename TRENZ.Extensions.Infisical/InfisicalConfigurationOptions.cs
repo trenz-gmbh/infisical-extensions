@@ -22,5 +22,5 @@ public class InfisicalConfigurationOptions
 
     public long? LoadTimeout { get; set; }
 
-    public bool? EnableUnderscoreToColonMapping { get; set; }
+    public bool? DisableDoubleUnderscoreToColonMapping { get; set; }
 }

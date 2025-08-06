@@ -12,7 +12,7 @@ public class InfisicalConfigurationSource(InfisicalConfigurationOptions options,
 
         var defaultClientWrapper = new InfisicalSecretsRepository(clientWrapperLogger, options);
 
-        if (options.EnableUnderscoreToColonMapping ?? true)
+        if (options.DisableDoubleUnderscoreToColonMapping ?? false)
             clientWrapper = new UnderscoreToColonMappingInfisicalClientWrapper(clientWrapper);
 
         return new InfisicalConfigurationProvider(providerLogger, options, clientWrapper);
