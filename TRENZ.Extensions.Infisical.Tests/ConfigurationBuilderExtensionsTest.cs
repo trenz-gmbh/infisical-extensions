@@ -50,7 +50,7 @@ public class ConfigureBuilderExtensionsTest
 
         var called = false;
 
-        builderMock.Object.AddInfisical(ConfigureCallback);
+        builderMock.Object.AddInfisical(configureCallback);
 
         using (Assert.EnterMultipleScope())
         {
@@ -62,7 +62,7 @@ public class ConfigureBuilderExtensionsTest
 
         return;
 
-        void ConfigureCallback(InfisicalConfigurationOptions options)
+        void configureCallback(InfisicalConfigurationOptions options)
         {
             called = true;
         }
