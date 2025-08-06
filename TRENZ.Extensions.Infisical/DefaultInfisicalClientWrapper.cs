@@ -27,9 +27,13 @@ public class DefaultInfisicalClientWrapper(
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
             SiteUrl = options.SiteUrl,
-            UserAgent = options.UserAgent!,
             CacheTtl = options.CacheTtl,
-            AccessToken = options.AccessToken!,
+#nullable disable
+            // These properties are _not_ nullable in the Infisical SDK, but they _can_  be null in our config.
+            // This means we intentionally suppress nullable warnings here
+            UserAgent = options.UserAgent,
+            AccessToken = options.AccessToken,
+#nullable restore
         };
 
         return new InfisicalClient(settings);
