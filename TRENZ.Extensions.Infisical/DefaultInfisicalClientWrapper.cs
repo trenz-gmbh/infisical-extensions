@@ -55,7 +55,8 @@ public class DefaultInfisicalClientWrapper(
         GC.SuppressFinalize(this);
     }
 
-    public IDictionary<string, SecretElement>? GetAllSecrets()
+    public async Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(
+        CancellationToken cancellationToken = default)
     {
         var request = new ListSecretsOptions
         {
@@ -83,9 +84,9 @@ public class DefaultInfisicalClientWrapper(
                     return null;
                 }
 
-                // back off exponentially but at least 50ms
+                // back off exponentially, but at least 50ms
                 var backoff = 50 + 5 * Math.Pow(2, retries);
-                Thread.Sleep((int)backoff);
+                await Task.Delay(TimeSpan.FromMilliseconds(backoff), cancellationToken);
             }
         }
     }

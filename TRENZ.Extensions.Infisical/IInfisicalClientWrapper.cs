@@ -4,5 +4,5 @@ namespace TRENZ.Extensions.Infisical;
 
 public interface IInfisicalClientWrapper
 {
-    IDictionary<string, SecretElement>? GetAllSecrets();
+    Task<IDictionary<string, SecretElement>?> GetAllSecretsAsync(CancellationToken cancellationToken = default);
 }
