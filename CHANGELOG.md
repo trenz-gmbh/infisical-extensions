@@ -3,7 +3,7 @@
 - Updated dependencies
 - Always handle errors gracefully (removed `PropagateExceptions`)
 - Added `EnableUnderscoreToColonMapping` option, which maps keys like `ConnectionStrings__DB` to
-  `ConnectionStrings:DB` (both keys are available yield the same secret); fixes #7
+  `ConnectionStrings:DB` (both keys are available, and yield the same secret); fixes #7
 
 # 1.0.6
 
