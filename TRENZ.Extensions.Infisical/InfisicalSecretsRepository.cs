@@ -23,7 +23,7 @@ public class InfisicalSecretsRepository(
             throw new InfisicalException("SiteUrl is not set.");
 
         var siteUrl = options.SiteUrl.TrimEnd('/');
-        if (!siteUrl.StartsWith("https"))
+        if (!siteUrl.StartsWith("https://"))
             throw new InfisicalException("SiteUrl must use HTTPS scheme");
 
         var settings = new ClientSettings
