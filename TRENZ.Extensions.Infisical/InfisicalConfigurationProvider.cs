@@ -119,13 +119,27 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
     {
         try
         {
-            var task = Task.Run(() => callback(client.GetAllSecrets()));
+            var loadTask = Task.Run(() => client.GetAllSecrets());
 
-            _ = task.Wait(timeout);
+            if (!loadTask.Wait(timeout))
+            {
+                logger?.LogWarning("Failed loading secrets (timed out after {Timeout})", timeout);
+
+                return;
+            }
+
+            if (!loadTask.IsCompletedSuccessfully)
+            {
+                logger?.LogWarning(loadTask.Exception, "Failed loading secrets");
+
+                return;
+            }
+
+            callback(loadTask.Result);
         }
         catch (Exception e)
         {
-            logger?.LogWarning(e, "Failed loading secrets with timeout ({Timeout})", timeout);
+            logger?.LogWarning(e, "Failed loading secrets");
         }
     }
 
