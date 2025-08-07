@@ -4,7 +4,7 @@ namespace TRENZ.Extensions.Infisical.Tests;
 
 public static class InfisicalSecretsRepositoryTest
 {
-    private static InfisicalConfigurationOptions GenerateCompleteConfig() => new()
+    private static InfisicalConfigurationOptions GenerateCompleteOptions() => new()
     {
         UserAgent = "userAgent",
         AccessToken = "accessToken",
@@ -19,33 +19,42 @@ public static class InfisicalSecretsRepositoryTest
     };
 
     [Test]
-    public static void TestConstructorHappyPath()
+    public static void TestCreateSettingsFromOptionsHappyPath()
     {
-        Assert.DoesNotThrow(() =>
+        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(GenerateCompleteOptions());
+        using (Assert.EnterMultipleScope())
         {
-            _ = new InfisicalSecretsRepository(null, GenerateCompleteConfig());
-        });
+            Assert.That(settings.UserAgent, Is.EqualTo("userAgent"));
+            Assert.That(settings.AccessToken, Is.EqualTo("accessToken"));
+            Assert.That(settings.CacheTtl, Is.EqualTo(1234L));
+            Assert.That(settings.ClientId, Is.EqualTo("clientId"));
+            Assert.That(settings.ClientSecret, Is.EqualTo("clientSecret"));
+            Assert.That(settings.SiteUrl, Is.EqualTo("https://siteUrl"));
+            Assert.That(settings.Auth, Is.Null);
+            Assert.That(settings.SslCertificatePath, Is.Null);
+        }
     }
 
     [Test]
-    public static void TestConstructorDoesntThrowWithTrailingSlash()
+    public static void TestCreateSettingsFromOptionsRemovesTrailingSlash()
     {
-        Assert.DoesNotThrow(() =>
-        {
-            var config = GenerateCompleteConfig();
-            config.SiteUrl = "https://siteUrl/";
-            _ = new InfisicalSecretsRepository(null, config);
-        });
+        var options = GenerateCompleteOptions();
+        options.SiteUrl = "https://siteUrl/";
+
+        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(options);
+
+        Assert.That(settings.SiteUrl, Is.EqualTo("https://siteUrl"));
     }
 
     [Test]
-    public static void TestConstructorDoesntThrowIfUserAgentIsNull()
+    public static void TestCreateSettingsFromOptionsDoesNotThrowIfUserAgentIsNull()
     {
         Assert.DoesNotThrow(() =>
         {
-            var config = GenerateCompleteConfig();
+            var config = GenerateCompleteOptions();
             config.UserAgent = null;
-            _ = new InfisicalSecretsRepository(null, config);
+
+            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
         });
     }
 
@@ -54,22 +63,27 @@ public static class InfisicalSecretsRepositoryTest
     {
         var e = Assert.Throws<InfisicalException>(() =>
         {
-            var config = GenerateCompleteConfig();
+            var config = GenerateCompleteOptions();
             config.SiteUrl = string.Empty;
-            _ = new InfisicalSecretsRepository(null, config);
+
+            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl is not set."));
     }
 
-    [Test]
-    public static void TestConstructorThrowsIfSiteUrlDoesNotUseHttps()
+    [Theory]
+    [TestCase("httpsiteurl")]
+    [TestCase("http://example.com")]
+    [TestCase("ftps://example.com")]
+    public static void TestConstructorThrowsIfSiteUrlDoesNotUseHttps(string siteUrl)
     {
         var e = Assert.Throws<InfisicalException>(() =>
         {
-            var config = GenerateCompleteConfig();
-            config.SiteUrl = "httpsiteUrl";
-            _ = new InfisicalSecretsRepository(null, config);
+            var config = GenerateCompleteOptions();
+            config.SiteUrl = siteUrl;
+
+            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl must use HTTPS scheme"));

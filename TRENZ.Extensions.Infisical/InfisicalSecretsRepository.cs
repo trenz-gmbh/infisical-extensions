@@ -10,8 +10,7 @@ public class InfisicalSecretsRepository(
     InfisicalConfigurationOptions options
 ) : ISecretsRepository, IDisposable
 {
-    [MustDisposeResource]
-    private static InfisicalClient CreateClientFromOptions(InfisicalConfigurationOptions options)
+    internal static ClientSettings CreateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
         if (string.IsNullOrEmpty(options.ClientId))
             throw new InfisicalException("ClientId is not set.");
@@ -40,10 +39,10 @@ public class InfisicalSecretsRepository(
 #nullable restore
         };
 
-        return new InfisicalClient(settings);
+        return settings;
     }
 
-    private readonly InfisicalClient client = CreateClientFromOptions(options);
+    private readonly InfisicalClient client = new(CreateSettingsFromOptions(options));
 
     private readonly string projectId = options.ProjectId ?? throw new InfisicalException("ProjectId is not set.");
 
