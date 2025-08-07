@@ -4,6 +4,7 @@
 - Always handle errors gracefully (removed `PropagateExceptions`)
 - Added `EnableUnderscoreToColonMapping` option, which maps keys like `ConnectionStrings__DB` to
   `ConnectionStrings:DB` (both keys are available, and yield the same secret); fixes #7
+- Silently removes trailing slashes in `SiteUrl` and throws if it doesn't use the HTTPS scheme; fixes #6
 
 # 1.0.6
 

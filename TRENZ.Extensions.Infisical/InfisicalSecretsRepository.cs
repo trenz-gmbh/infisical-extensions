@@ -10,8 +10,7 @@ public class InfisicalSecretsRepository(
     InfisicalConfigurationOptions options
 ) : ISecretsRepository, IDisposable
 {
-    [MustDisposeResource]
-    private static InfisicalClient CreateClientFromOptions(InfisicalConfigurationOptions options)
+    internal static ClientSettings CreateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
         if (string.IsNullOrEmpty(options.ClientId))
             throw new InfisicalException("ClientId is not set.");
@@ -22,11 +21,15 @@ public class InfisicalSecretsRepository(
         if (string.IsNullOrEmpty(options.SiteUrl))
             throw new InfisicalException("SiteUrl is not set.");
 
+        var siteUrl = options.SiteUrl.TrimEnd('/');
+        if (!siteUrl.StartsWith("https://"))
+            throw new InfisicalException("SiteUrl must use HTTPS scheme");
+
         var settings = new ClientSettings
         {
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
-            SiteUrl = options.SiteUrl,
+            SiteUrl = siteUrl,
             CacheTtl = options.CacheTtl,
 #nullable disable
             // These properties are _not_ nullable in the Infisical SDK, but they _can_  be null in our config.
@@ -36,10 +39,10 @@ public class InfisicalSecretsRepository(
 #nullable restore
         };
 
-        return new InfisicalClient(settings);
+        return settings;
     }
 
-    private readonly InfisicalClient client = CreateClientFromOptions(options);
+    private readonly InfisicalClient client = new(CreateSettingsFromOptions(options));
 
     private readonly string projectId = options.ProjectId ?? throw new InfisicalException("ProjectId is not set.");
 
@@ -82,6 +85,8 @@ public class InfisicalSecretsRepository(
 
                     return null;
                 }
+
+                // can't use async here, see https://github.com/dotnet/runtime/issues/36018
 
                 // back off exponentially but at least 50ms
                 var backoff = 50 + 5 * Math.Pow(2, retries);
