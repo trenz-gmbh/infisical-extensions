@@ -1,5 +1,7 @@
 # Unreleased
 
+# 1.1.0
+
 - Updated dependencies
 - Always handle errors gracefully (removed `PropagateExceptions`)
 - Added `EnableUnderscoreToColonMapping` option, which maps keys like `ConnectionStrings__DB` to
