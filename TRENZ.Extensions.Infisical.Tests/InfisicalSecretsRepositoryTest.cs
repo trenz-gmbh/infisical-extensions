@@ -29,7 +29,7 @@ public static class InfisicalSecretsRepositoryTest
             Assert.That(settings.CacheTtl, Is.EqualTo(1234L));
             Assert.That(settings.ClientId, Is.EqualTo("clientId"));
             Assert.That(settings.ClientSecret, Is.EqualTo("clientSecret"));
-            Assert.That(settings.SiteUrl, Is.EqualTo("https://siteUrl"));
+            Assert.That(settings.SiteUrl, Is.EqualTo("https://siteurl"));
             Assert.That(settings.Auth, Is.Null);
             Assert.That(settings.SslCertificatePath, Is.Null);
         }
@@ -43,7 +43,7 @@ public static class InfisicalSecretsRepositoryTest
 
         var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(options);
 
-        Assert.That(settings.SiteUrl, Is.EqualTo("https://siteUrl"));
+        Assert.That(settings.SiteUrl, Is.EqualTo("https://siteurl"));
     }
 
     [Test]
@@ -72,8 +72,19 @@ public static class InfisicalSecretsRepositoryTest
         Assert.That(e.Message, Is.EqualTo("SiteUrl is not set."));
     }
 
+    [Test]
+    public static void TestSiteUrlAllowsHttpForLocalhost()
+    {
+        var config = GenerateCompleteOptions();
+        config.SiteUrl = "http://localhost:8080";
+
+        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+
+        Assert.That(settings.SiteUrl, Is.EqualTo("http://localhost:8080"));
+    }
+
     [Theory]
-    [TestCase("httpsiteurl")]
+    [TestCase("//httpsiteurl.com")]
     [TestCase("http://example.com")]
     [TestCase("ftps://example.com")]
     public static void TestConstructorThrowsIfSiteUrlDoesNotUseHttps(string siteUrl)
