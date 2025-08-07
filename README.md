@@ -66,7 +66,8 @@ builder.AddInfisicalConfiguration();
 This will add an `InfisicalConfigurationProvider` that provides all available secrets through `IConfiguration`.
 
 > [!Note]
-> The provider drops all keys in the "Infisical" object in order to protect your infisical credentials.
+> The provider drops all keys in the "Infisical" object in order to protect your infisical credentials, so you won't
+> see the keys at runtime.
 
 ## Managing an Infisical Project
 
