@@ -2,10 +2,13 @@
 
 - Updated dependencies
 - Always handle errors gracefully (removed `PropagateExceptions`)
+- Added `EnableUnderscoreToColonMapping` option, which maps keys like `ConnectionStrings__DB` to
+  `ConnectionStrings:DB` (both keys are available, and yield the same secret); fixes #7
 
 # 1.0.6
 
-- You can now set a `PropagateExceptions` boolean to specify whether errors while loading the secrets should be propagated or suppressed
+- You can now set a `PropagateExceptions` boolean to specify whether errors while loading the secrets should be
+  propagated or suppressed
 - Added exponential backoff for failed requests (max 10 failed requests; the `LoadTimeout` has precedence)
 - Updated to the latest Infisical SDK
 
@@ -20,7 +23,7 @@
 # 1.0.3
 
 - Fixed issue where no keys from `appsettings.json` where available after adding infisical
-  - Now, all keys except `Infisical:*` are available
+    - Now, all keys except `Infisical:*` are available
 
 # 1.0.2
 
