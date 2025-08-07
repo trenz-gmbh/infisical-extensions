@@ -71,7 +71,7 @@ This will add an `InfisicalConfigurationProvider` that provides all available se
 
 ## Managing an Infisical Project
 
-When you manage an Infisical project you want to access with this extension, you need to mindful of the following
+When you manage an Infisical project you want to access with this extension, you need to be mindful of the following
 things:
 
 ### Environment does not equal Environment _Slug_
