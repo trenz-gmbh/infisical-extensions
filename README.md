@@ -95,7 +95,7 @@ When adding or changing an environment, you need to be mindful of the impact thi
 Infisical likes to enforce capitalized secret key names.
 This is usually not what you want for your `IConfiguration` keys.
 
-You can disable automatic capitalization by turning off this option in the Secrets Manager settings:
+You can disable automatic capitalization by enabling this option in the Secrets Manager settings:
 
 !["Enforce Capitalization" option in the Infisical Secrets Manager settings](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/enforce-capitalization-option.png)
 
@@ -110,7 +110,7 @@ For example:
 - You added a secret with the key `ConnectionStrings__DB`
 - You use this extension to load it into your `IConfiguration`
 - You can access the secret using `IConfiguration.GetConnectionString("DB")`
-  - this works, because then `GetConnectionString` extension method expects a key `ConnectionStrings:<name>`, and
+  - this works, because the `GetConnectionString` extension method expects a key `ConnectionStrings:<name>`, and
   - this extension translates `ConnectionStrings__DB` to `ConnectionStrings:DB`
 
 ## Polling for changes
