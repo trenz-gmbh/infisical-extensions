@@ -3,16 +3,44 @@
 This project adds extension methods for the [Infisical .NET SDK](https://infisical.com/docs/sdks/languages/csharp) to
 register it as a configuration provider in your .NET app.
 
+## Installation
+
+```bash
+dotnet add package TRENZ.Extensions.Infisical
+```
+
 ## Usage
 
-Disable End-to-End encryption in your Infisical project settings. The .NET SDK does not support it yet:
+You will need four things to integrate this extension:
 
-![Screenshot of disabled End-to-End Encryption checkbox](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/disable-e2ee.png)
+- Your site URL (`https://infisical.company.com`)
+- A Client ID/secret pair
+- A project ID
 
-> **Note**
-> While you're in the settings, we also recommend to disable "Auto Capitalization"
+The site URL is obvious.
+It's where you can access the web UI of your instance.
 
-Add your infisical settings to `appsettings.json`:
+Client ID & secret are a bit more hidden:
+
+1. From the home page of your instance, navigate to "Access Control"
+2. Switch to the tab "Identities"
+3. Choose an identity you want your app to use (or create one)
+4. Under "Authentication", add or edit "Universal Auth"
+5. Copy the Client ID
+6. Click "Add Client Secret"
+7. Give it a name
+8. Copy the Client Secret
+
+The last thing you need is the project ID.
+You can find this here:
+
+1. From the home page of your instance, navigate to "Projects"
+2. Choose your project (or create one)
+3. On the left sidebar, switch to "Project Settings" (**not** "Settings", that one is for the "Secrets Manager")
+4. In the "General" tab -> "Project Overview", you will find a button "Copy Project ID"
+5. Click it
+
+After you gathered all this information, add them to your `appsettings.json`:
 
 ```json
 {
@@ -35,39 +63,57 @@ builder.AddInfisicalConfiguration();
 // ...
 ```
 
-This will add a `InfisicalConfigurationProvider` that provides all available secrets through `IConfiguration`.
+This will add an `InfisicalConfigurationProvider` that provides all available secrets through `IConfiguration`.
 
-> **Note**
-> The provider drops all keys in the "Infisical" object to protect your infisical credentials.
+> [!Note]
+> The provider drops all keys in the "Infisical" object in order to protect your infisical credentials.
 
----
+## Managing an Infisical Project
 
-Suppose you want to store your connection string in Infisical.
+When you manage an Infisical project you want to access with this extension, you need to mindful of the following
+things:
 
-You first need to add a secret in the respective environment through the infisical interface:
+### Environment does not equal Environment _Slug_
 
-> Note that infisical doesn't support nested secrets. The keys of the secrets need to include ":" to represent nested
-> keys in an `appsettings.json`.
+You can define different secret values for each environment your app runs in.
+This is really helpful for scenarios where you have a production environment and a development environment.
 
-![Screenshot of Infisical with a secret called "ConnectionStrings:MyDatabase"](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/example-screenshot.png)
+This extension supports different environments and even picks up the current `IHostEnvironment.EnvironmentName` and
+includes it when asking for the secrets.
 
-Then, in code, you can inject `IConfiguration` in your class and access its value as if it was in your
-`appsettings.json`:
+However, when managing your Infisical project environments, notice how your environment has a name, and a slug (as seen
+here in the Secrets Manager settings):
 
-```csharp
-public class MyConnectionStringProvider(IConfiguration configuration) {
-    public string GetConnectionString() {
-        // The following call looks up the key "ConnectionStrings:MyDatabase" in IConfiguration
-        return configuration.GetConnectionString("MyDatabase");
-    }
-}
-```
+!["Environments" section in the Infisical Secrets Manager settings](./docs/environments-and-slugs.png)
 
-You could also access the key directly using:
+This extension uses the environment names used by .NET, for example `Development`, but converted to lowercase
+(`development`).
+This must match one of your environment _slugs_.
 
-```csharp
-var connectionString = configuration["ConnectionStrings:MyDatabase"];
-```
+When adding or changing an environment, you need to be mindful of the impact this has for your infisical project.
+
+### Enforced Capitalization
+
+Infisical likes to enforce capitalized secret key names.
+This is usually not what you want for your `IConfiguration` keys.
+
+You can disable automatic capitalization by turning off this option in the Secrets Manager settings:
+
+!["Enforce Capitalization" option in the Infisical Secrets Manager settings](./docs/enforce-capitalization-option.png)
+
+### Automatic secret key mapping
+
+Since Infisical doesn't allow colons (`:`) in the secret key anymore, we have integrated a mechanism that allows you
+to use double underscores (`__`) instead.
+Any key with double underscores will appear with colons in your `IConfiguration`.
+
+For example:
+
+- You added a secret with the key `ConnectionStrings__DB`
+- You use this extension to load it into your `IConfiguration`
+- You can access the secret using `IConfiguration.GetConnectionString("DB")`
+  - this works, because then `GetConnectionString` extension method expects a key `ConnectionStrings:<name>`, and
+  - this extension translates `ConnectionStrings__DB` to `ConnectionStrings:DB`
 
 ## Polling for changes
 
@@ -106,12 +152,6 @@ wait for the initial (and subsequent) loads of the secrets.
 
 The default timeout is `5000` (5s).
 To disable the timeout, set the value to `-1`.
-
-## Installation
-
-```bash
-dotnet add package TRENZ.Extensions.Infisical
-```
 
 ## License
 
