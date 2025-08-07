@@ -30,7 +30,7 @@ public class InfisicalSecretsRepository(
         {
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
-            SiteUrl = options.SiteUrl,
+            SiteUrl = siteUrl,
             CacheTtl = options.CacheTtl,
 #nullable disable
             // These properties are _not_ nullable in the Infisical SDK, but they _can_  be null in our config.
