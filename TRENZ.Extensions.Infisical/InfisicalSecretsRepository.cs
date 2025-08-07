@@ -21,15 +21,27 @@ public class InfisicalSecretsRepository(
         if (string.IsNullOrEmpty(options.SiteUrl))
             throw new InfisicalException("SiteUrl is not set.");
 
-        var siteUrl = options.SiteUrl.TrimEnd('/');
-        if (!siteUrl.StartsWith("https://"))
+        if (!Uri.TryCreate(options.SiteUrl, UriKind.Absolute, out var givenSiteUrl))
+            throw new InfisicalException("SiteUrl is not a valid URL");
+
+        if (givenSiteUrl.Scheme != "https" && givenSiteUrl.Host != "localhost")
             throw new InfisicalException("SiteUrl must use HTTPS scheme");
+
+        var sanitizedSiteUrl = new UriBuilder
+            {
+                Scheme = givenSiteUrl.Scheme,
+                Host = givenSiteUrl.Host,
+                Port = givenSiteUrl.Port,
+            }
+            .Uri
+            .ToString()
+            .TrimEnd('/'); // empty path results in trailing /
 
         var settings = new ClientSettings
         {
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
-            SiteUrl = siteUrl,
+            SiteUrl = sanitizedSiteUrl,
             CacheTtl = options.CacheTtl,
 #nullable disable
             // These properties are _not_ nullable in the Infisical SDK, but they _can_  be null in our config.
