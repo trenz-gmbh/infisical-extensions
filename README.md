@@ -84,7 +84,7 @@ includes it when asking for the secrets.
 However, when managing your Infisical project environments, notice how your environment has a name, and a slug (as seen
 here in the Secrets Manager settings):
 
-!["Environments" section in the Infisical Secrets Manager settings](./docs/environments-and-slugs.png)
+!["Environments" section in the Infisical Secrets Manager settings](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/environments-and-slugs.png)
 
 This extension uses the environment names used by .NET, for example `Development`, but converted to lowercase
 (`development`).
@@ -99,7 +99,7 @@ This is usually not what you want for your `IConfiguration` keys.
 
 You can disable automatic capitalization by turning off this option in the Secrets Manager settings:
 
-!["Enforce Capitalization" option in the Infisical Secrets Manager settings](./docs/enforce-capitalization-option.png)
+!["Enforce Capitalization" option in the Infisical Secrets Manager settings](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/enforce-capitalization-option.png)
 
 ### Automatic secret key mapping
 
