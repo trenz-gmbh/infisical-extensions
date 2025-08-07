@@ -40,20 +40,32 @@ public class ConfigureBuilderExtensionsTest
         var builderMock = new Mock<IConfigurationBuilder>();
         builderMock
             .Setup(b => b.Add(Capture.In(args)))
-            .Returns(builderMock.Object);
+            .Returns(builderMock.Object)
+            .Verifiable();
 
-        builderMock.Setup(b => b.Build()).Returns(MockConfiguration());
+        builderMock
+            .Setup(b => b.Build())
+            .Returns(MockConfiguration())
+            .Verifiable();
 
         var called = false;
-        var configureCallback = (InfisicalConfigurationOptions options) => { called = true; };
 
         builderMock.Object.AddInfisical(configureCallback);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(called, Is.True);
             Assert.That(args, Is.Not.Empty);
-        });
+        }
+
+        builderMock.VerifyAll();
+
+        return;
+
+        void configureCallback(InfisicalConfigurationOptions options)
+        {
+            called = true;
+        }
     }
 
     [Test]
@@ -71,7 +83,10 @@ public class ConfigureBuilderExtensionsTest
         );
 
         var builderMock = new Mock<IConfigurationBuilder>();
-        builderMock.Setup(b => b.Build()).Returns(tempConfig);
+        builderMock
+            .Setup(b => b.Build())
+            .Returns(tempConfig)
+            .Verifiable();
 
         InfisicalConfigurationOptions? options = null;
         builderMock.Object.AddInfisical(o =>
@@ -80,7 +95,8 @@ public class ConfigureBuilderExtensionsTest
         });
 
         Assert.That(options, Is.Not.Null);
-        Assert.Multiple(() =>
+
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(options!.EnvironmentName, Is.EqualTo("Development"));
             Assert.That(options.ClientId, Is.EqualTo("clientId"));
@@ -91,7 +107,9 @@ public class ConfigureBuilderExtensionsTest
             Assert.That(options.CacheTtl, Is.EqualTo(1000));
             Assert.That(options.UserAgent, Is.EqualTo("userAgent"));
             Assert.That(options.PollingInterval, Is.EqualTo(1000));
-        });
+        }
+
+        builderMock.VerifyAll();
     }
 
     [Test]
@@ -100,10 +118,16 @@ public class ConfigureBuilderExtensionsTest
         var tempConfig = MockConfiguration();
 
         var environmentMock = new Mock<IHostEnvironment>();
-        environmentMock.Setup(e => e.EnvironmentName).Returns("Test");
+        environmentMock
+            .Setup(e => e.EnvironmentName)
+            .Returns("Test")
+            .Verifiable();
 
         var builderMock = new Mock<IConfigurationBuilder>();
-        builderMock.Setup(b => b.Build()).Returns(tempConfig);
+        builderMock
+            .Setup(b => b.Build())
+            .Returns(tempConfig)
+            .Verifiable();
 
         InfisicalConfigurationOptions? options = null;
         builderMock.Object.AddInfisical(environmentMock.Object, o =>
@@ -113,5 +137,7 @@ public class ConfigureBuilderExtensionsTest
 
         Assert.That(options, Is.Not.Null);
         Assert.That(options!.EnvironmentName, Is.EqualTo("Test"));
+
+        builderMock.VerifyAll();
     }
 }

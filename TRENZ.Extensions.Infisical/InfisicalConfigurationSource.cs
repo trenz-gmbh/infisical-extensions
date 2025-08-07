@@ -1,11 +1,17 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace TRENZ.Extensions.Infisical;
 
-public class InfisicalConfigurationSource(InfisicalConfigurationOptions options) : IConfigurationSource
+public class InfisicalConfigurationSource(InfisicalConfigurationOptions options, ILoggerFactory? loggerFactory = null) : IConfigurationSource
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        return new InfisicalConfigurationProvider(options);
+        var providerLogger = loggerFactory?.CreateLogger<InfisicalConfigurationProvider>();
+        var clientWrapperLogger = loggerFactory?.CreateLogger<InfisicalSecretsRepository>();
+
+        var defaultClientWrapper = new InfisicalSecretsRepository(clientWrapperLogger, options);
+
+        return new InfisicalConfigurationProvider(providerLogger, options, defaultClientWrapper);
     }
 }
