@@ -75,13 +75,7 @@ things:
 
 ### Environment does not equal Environment _Slug_
 
-You can define different secret values for each environment your app runs in.
-This is really helpful for scenarios where you have a production environment and a development environment.
-
-This extension supports different environments and even picks up the current `IHostEnvironment.EnvironmentName` and
-includes it when asking for the secrets.
-
-However, when managing your Infisical project environments, notice how your environment has a name, and a slug (as seen
+When managing your Infisical project environments, notice how your environment has a name, and a slug (as seen
 here in the Secrets Manager settings):
 
 !["Environments" section in the Infisical Secrets Manager settings](https://raw.githubusercontent.com/trenz-gmbh/infisical-extensions/main/docs/environments-and-slugs.png)
@@ -89,6 +83,9 @@ here in the Secrets Manager settings):
 This extension uses the environment names used by .NET, for example `Development`, but converted to lowercase
 (`development`).
 This must match one of your environment _slugs_.
+
+By default, this extension picks up the current `IHostEnvironment.EnvironmentName` and uses it when asking for the
+secrets.
 
 When adding or changing an environment, you need to be mindful of the impact this has for your infisical project.
 
