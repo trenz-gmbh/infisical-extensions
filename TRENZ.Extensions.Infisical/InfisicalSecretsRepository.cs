@@ -87,6 +87,8 @@ public class InfisicalSecretsRepository(
                     return null;
                 }
 
+                // can't use async here, see https://github.com/dotnet/runtime/issues/36018
+
                 // back off exponentially but at least 50ms
                 var backoff = 50 + 5 * Math.Pow(2, retries);
                 Thread.Sleep((int)backoff);
