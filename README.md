@@ -31,6 +31,9 @@ Client ID & secret are a bit more hidden:
 7. Give it a name
 8. Copy the Client Secret
 
+> [!TIP]
+> Also make sure you give this identity access to your project!
+
 The last thing you need is the project ID.
 You can find this here:
 
