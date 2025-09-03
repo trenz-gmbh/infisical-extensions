@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   db-migration:
     container_name: infisical-db-migration
@@ -9,7 +7,6 @@ services:
     image: infisical/infisical:latest-postgres
     env_file: .env
     command: npm run migration:latest
-    pull_policy: always
     networks:
       - infisical
 
@@ -24,7 +21,6 @@ services:
       db-migration:
         condition: service_completed_successfully
     image: infisical/infisical:latest-postgres
-    pull_policy: always
     env_file: .env
     ports:
       - "8080:8080"
@@ -40,7 +36,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - 6379:6379
+      - "6379:6379"
     networks:
       - infisical
     volumes:
@@ -61,10 +57,31 @@ services:
       timeout: 10s
       retries: 10
 
+  mails:
+    container_name: infisical-mails
+    image: axllent/mailpit
+    restart: always
+    networks:
+      - infisical
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    volumes:
+      - mail_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+#      MP_SMTP_TLS_CERT: sans:localhost
+#      MP_SMTP_TLS_KEY: sans:localhost
+
 volumes:
   pg_data:
     driver: local
   redis_data:
+    driver: local
+  mail_data:
     driver: local
 
 networks:
