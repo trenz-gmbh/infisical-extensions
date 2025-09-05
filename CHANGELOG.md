@@ -1,9 +1,14 @@
 # Unreleased
 
+# 1.1.2
+
+- Bump release
+
 # 1.1.1
 
 - Fix issue with disposing the provider (NotImplementedException when clearing secrets)
 - Added lots of trace logging to help debugging
+- Updated to .NET 9
 
 # 1.1.0
 
