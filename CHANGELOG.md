@@ -1,6 +1,7 @@
 # Unreleased
 
 - Fix issue with disposing the provider (NotImplementedException when clearing secrets)
+- Added lots of trace logging to help debugging
 
 # 1.1.0
 

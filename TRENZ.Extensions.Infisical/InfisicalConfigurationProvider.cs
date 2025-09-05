@@ -28,6 +28,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
         if (options.PollingInterval is { } pollingInterval)
         {
+            logger?.LogTrace("Enabling period check with interval {Interval}ms", pollingInterval);
+
             checkForChangesTimer = new Timer(CheckForChanges, null, pollingInterval, pollingInterval);
         }
     }
@@ -47,6 +49,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private void CheckForChanges(object? state)
     {
+        logger?.LogTrace("Checking for changes");
+
         LoadSecretsWithTimeout(newSecrets =>
         {
             if (newSecrets == null) // secret loading failed, handle gracefully
@@ -55,9 +59,11 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
             if (!CheckHasChanged(newSecrets))
                 return;
 
+            logger?.LogTrace("Using updated secrets");
+
             var previousToken = reloadTokenSource;
 
-            Load();
+            secrets = newSecrets;
             reloadTokenSource = new CancellationTokenSource();
 
             previousToken.Cancel();
@@ -87,6 +93,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     public void Load()
     {
+        logger?.LogTrace("Initially loading secrets");
+
         LoadSecretsWithTimeout(s =>
         {
             if (s == null)
@@ -101,22 +109,38 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         var oldSecrets = secrets;
 
         if (newSecrets.Count != oldSecrets.Count)
+        {
+            logger?.LogTrace("Secrets appear to have changed (different counts)");
+
             return true;
+        }
 
         foreach (var (key, value) in newSecrets)
         {
             if (!oldSecrets.TryGetValue(key, out var oldValue))
+            {
+                logger?.LogTrace("Secrets appear to have changed (new secrets found)");
+
                 return true;
+            }
 
             if (value.SecretValue != oldValue.SecretValue)
+            {
+                logger?.LogTrace("Secrets appear to have changed (different secret values)");
+
                 return true;
+            }
         }
+
+        logger?.LogTrace("Secrets have not changed");
 
         return false;
     }
 
     private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>?> callback, TimeSpan timeout)
     {
+        logger?.LogTrace("Loading secrets with timeout {Timeout}", timeout);
+
         try
         {
             var loadTask = Task.Run(() => client.GetAllSecrets());
@@ -134,6 +158,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
                 return;
             }
+
+            logger?.LogTrace("Successfully loaded secrets");
 
             callback(loadTask.Result);
         }
@@ -182,8 +208,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
         reloadTokenSource.Dispose();
 
-        if (logger is IDisposable d)
-            d.Dispose();
+        if (logger is IDisposable l)
+            l.Dispose();
 
         if (!secrets.IsReadOnly)
             secrets.Clear();
