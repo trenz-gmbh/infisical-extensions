@@ -16,11 +16,11 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
         <Title>Infisical Extensions</Title>
-        <Version>1.1.0</Version>
+        <Version>1.1.1</Version>
 
         <Authors>TRENZ GmbH</Authors>
         <Description>Adds extensions for adding Infisical to .NET applications.</Description>
-        <Copyright>2024 TRENZ GmbH</Copyright>
+        <Copyright>2025 TRENZ GmbH</Copyright>
 
         <PackageProjectUrl>https://github.com/trenz-gmbh/infisical-extensions</PackageProjectUrl>
         <PackageTags>Infisical, extension</PackageTags>
