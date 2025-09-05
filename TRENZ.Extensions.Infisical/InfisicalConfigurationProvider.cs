@@ -185,7 +185,8 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         if (logger is IDisposable d)
             d.Dispose();
 
-        secrets.Clear();
+        if (!secrets.IsReadOnly)
+            secrets.Clear();
 
         GC.SuppressFinalize(this);
     }

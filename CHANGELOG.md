@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fix issue with disposing the provider (NotImplementedException when clearing secrets)
+
 # 1.1.0
 
 - Updated dependencies
