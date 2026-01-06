@@ -86,7 +86,17 @@ here in the Secrets Manager settings):
 
 This extension uses the environment names used by .NET, for example `Development`, but converted to lowercase
 (`development`).
-This must match one of your environment _slugs_.
+This must match one of your environment _slugs_, and by default maps `Development`/`development` to `dev` and 
+`Production`/`production` to `prod`. `Staging`/`staging` already maps correctly. If you want do not want to map
+the standard names, set `Infisical:DisableMappingToInfisicalStandardEnvironments` to `true` in your `appsettings.json`:
+```json
+{
+  "Infisical": {
+    ...
+    "DisableMappingToInfisicalStandardEnvironments": true
+  }
+}
+```
 
 By default, this extension picks up the current `IHostEnvironment.EnvironmentName` and uses it when asking for the
 secrets.

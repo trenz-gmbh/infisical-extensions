@@ -13,6 +13,19 @@ public class InfisicalSecretsRepository(
 {
     internal static InfisicalConfigurationOptions ValidateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
+        options.EnvironmentName ??= "development";
+        if (!options.DisableMappingToInfisicalStandardEnvironments.GetValueOrDefault())
+        {
+            switch (options.EnvironmentName.ToLowerInvariant())
+            {
+                case "development":
+                    options.EnvironmentName = "dev";
+                    break;
+                case "production":
+                    options.EnvironmentName = "prod";
+                    break;
+            }
+        }
 
         if (string.IsNullOrEmpty(options.ProjectId))
             throw new InfisicalException("ProjectId is not set.");
@@ -33,11 +46,11 @@ public class InfisicalSecretsRepository(
             throw new InfisicalException("SiteUrl must use HTTPS scheme");
 
         options.SiteUrl = new UriBuilder
-            {
-                Scheme = givenSiteUrl.Scheme,
-                Host = givenSiteUrl.Host,
-                Port = givenSiteUrl.Port,
-            }
+        {
+            Scheme = givenSiteUrl.Scheme,
+            Host = givenSiteUrl.Host,
+            Port = givenSiteUrl.Port,
+        }
             .Uri
             .ToString()
             .TrimEnd('/'); // empty path results in trailing /
@@ -46,7 +59,7 @@ public class InfisicalSecretsRepository(
     }
 
     private static InfisicalClient GetClient(ILogger logger, InfisicalConfigurationOptions options)
-        {
+    {
         options = ValidateSettingsFromOptions(options); // ensure valid options
 
         var sdkSettings = new InfisicalSdkSettingsBuilder()
@@ -54,12 +67,12 @@ public class InfisicalSecretsRepository(
             .Build();
 
         var client = new InfisicalClient(sdkSettings);
-
+        
         try
         {
-        Task loginTask = client.Auth().UniversalAuth()
-            .LoginAsync(options.ClientId!, options.ClientSecret!);
-        loginTask.Wait();
+            Task loginTask = client.Auth().UniversalAuth()
+                .LoginAsync(options.ClientId!, options.ClientSecret!);
+            loginTask.Wait();
         }
         catch (Exception ex)
         {
