@@ -67,7 +67,7 @@ public class InfisicalSecretsRepository(
             .Build();
 
         var client = new InfisicalClient(sdkSettings);
-        
+
         try
         {
             logger?.LogDebug("Connecting to Infisical secrets instance at {Url}, environment {Environment}", 
@@ -111,11 +111,11 @@ public class InfisicalSecretsRepository(
             {
                 if (_client != null)
                 {
-                var results = _client.Secrets().ListAsync(request).GetAwaiter().GetResult();
-                return results.ToFrozenDictionary(s => s.SecretKey);
+                    var results = _client.Secrets().ListAsync(request).GetAwaiter().GetResult();
+                    return results.ToFrozenDictionary(s => s.SecretKey);
+                }
             }
-            }
-            catch (InfisicalException e)
+            catch (InfisicalException e) 
                 when (e.InnerException != null && 
                       e.InnerException.Message.Contains("Error during GET request: Unexpected response: Unauthorized"))
             {
@@ -126,6 +126,8 @@ public class InfisicalSecretsRepository(
             catch (Exception e)
             {
                 retries++;
+                logger?.LogWarning(e, "Failed to load secrets, attempt #{Try}", retries);
+
                 if (retries >= maxRetries)
                 {
                     logger?.LogError(e, "Max retries exceeded");
@@ -134,11 +136,11 @@ public class InfisicalSecretsRepository(
                 }
             }
 
-                // can't use async here, see https://github.com/dotnet/runtime/issues/36018
+            // can't use async here, see https://github.com/dotnet/runtime/issues/36018
 
-                // back off exponentially but at least 50ms
-                var backoff = 50 + 5 * Math.Pow(2, retries);
-                Thread.Sleep((int)backoff);
-            }
+            // back off exponentially but at least 50ms
+            var backoff = 50 + 5 * Math.Pow(2, retries);
+            Thread.Sleep((int)backoff);
         }
     }
+}
