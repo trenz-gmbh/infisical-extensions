@@ -58,7 +58,7 @@ public class InfisicalSecretsRepository(
         return options;
     }
 
-    private static InfisicalClient GetClient(ILogger logger, InfisicalConfigurationOptions options)
+    private static InfisicalClient GetClient(ILogger? logger, InfisicalConfigurationOptions options)
     {
         options = ValidateSettingsFromOptions(options); // ensure valid options
 
@@ -70,19 +70,22 @@ public class InfisicalSecretsRepository(
         
         try
         {
-            Task loginTask = client.Auth().UniversalAuth()
-                .LoginAsync(options.ClientId!, options.ClientSecret!);
-            loginTask.Wait();
+            logger?.LogDebug("Connecting to Infisical secrets instance at {Url}, environment {Environment}", 
+                options.SiteUrl, options.EnvironmentName);
+
+            client.Auth().UniversalAuth()
+                .LoginAsync(options.ClientId!, options.ClientSecret!)
+                .GetAwaiter().GetResult();
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Failed to log into infisical secrets instance.");
+            logger?.LogError(ex, "Failed to log into Infisical secrets instance.");
         }
 
         return client;
     }
 
-    private readonly InfisicalClient _client = GetClient(logger, options);
+    private readonly InfisicalClient? _client = GetClient(logger, options);
 
     public void Dispose()
     {
@@ -106,8 +109,11 @@ public class InfisicalSecretsRepository(
         {
             try
             {
+                if (_client != null)
+                {
                 var results = _client.Secrets().ListAsync(request).GetAwaiter().GetResult();
                 return results.ToFrozenDictionary(s => s.SecretKey);
+            }
             }
             catch (InfisicalException e)
             {
@@ -116,10 +122,11 @@ public class InfisicalSecretsRepository(
                 retries++;
                 if (retries >= maxRetries)
                 {
-                    logger?.LogCritical(e, "Max retries exceeded");
+                    logger?.LogError(e, "Max retries exceeded");
 
                     return null;
                 }
+            }
 
                 // can't use async here, see https://github.com/dotnet/runtime/issues/36018
 
@@ -129,4 +136,3 @@ public class InfisicalSecretsRepository(
             }
         }
     }
-}
