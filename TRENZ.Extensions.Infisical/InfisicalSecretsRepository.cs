@@ -116,9 +116,15 @@ public class InfisicalSecretsRepository(
             }
             }
             catch (InfisicalException e)
+                when (e.InnerException != null && 
+                      e.InnerException.Message.Contains("Error during GET request: Unexpected response: Unauthorized"))
             {
-                logger?.LogInformation(e, "Failed to load secrets");
+                logger?.LogError(e, "Failed to load secrets: check credentials to Infisical secrets instance.");
 
+                return null;
+            }
+            catch (Exception e)
+            {
                 retries++;
                 if (retries >= maxRetries)
                 {
