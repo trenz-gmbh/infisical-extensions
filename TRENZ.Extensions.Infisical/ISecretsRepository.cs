@@ -4,5 +4,5 @@ namespace TRENZ.Extensions.Infisical;
 
 public interface ISecretsRepository
 {
-    IDictionary<string, SecretElement>? GetAllSecrets();
+    IDictionary<string, Secret>? GetAllSecrets();
 }

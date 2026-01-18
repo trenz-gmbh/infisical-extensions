@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using Infisical.Sdk;
+using Infisical.Sdk.Model;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
@@ -70,7 +71,7 @@ public class InfisicalSecretsRepository(
         GC.SuppressFinalize(this);
     }
 
-    public IDictionary<string, SecretElement>? GetAllSecrets()
+    public IDictionary<string, Secret>? GetAllSecrets()
     {
         var request = new ListSecretsOptions
         {
@@ -84,7 +85,7 @@ public class InfisicalSecretsRepository(
         {
             try
             {
-                return client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+                return client.Secrets().ListAsync(request).GetAwaiter().GetResult();
             }
             catch (InfisicalException e)
             {
