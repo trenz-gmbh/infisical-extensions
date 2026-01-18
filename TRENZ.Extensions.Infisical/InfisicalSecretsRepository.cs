@@ -12,6 +12,9 @@ public class InfisicalSecretsRepository(
 {
     internal static ClientSettings CreateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
+        if (string.IsNullOrEmpty(options.ProjectId))
+            throw new InfisicalException("ProjectId is not set.");
+
         if (string.IsNullOrEmpty(options.ClientId))
             throw new InfisicalException("ClientId is not set.");
 
