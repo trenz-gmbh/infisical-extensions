@@ -21,7 +21,7 @@ public static class InfisicalSecretsRepositoryTest
     [Test]
     public static void TestCreateSettingsFromOptionsHappyPath()
     {
-        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(GenerateCompleteOptions());
+        var settings = InfisicalSecretsRepository.ValidateSettingsFromOptions(GenerateCompleteOptions());
         using (Assert.EnterMultipleScope())
         {
             Assert.That(settings.UserAgent, Is.EqualTo("userAgent"));
@@ -41,7 +41,7 @@ public static class InfisicalSecretsRepositoryTest
         var options = GenerateCompleteOptions();
         options.SiteUrl = "https://siteUrl/";
 
-        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(options);
+        var settings = InfisicalSecretsRepository.ValidateSettingsFromOptions(options);
 
         Assert.That(settings.SiteUrl, Is.EqualTo("https://siteurl"));
     }
@@ -54,7 +54,7 @@ public static class InfisicalSecretsRepositoryTest
             var config = GenerateCompleteOptions();
             config.UserAgent = null;
 
-            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+            _ = InfisicalSecretsRepository.ValidateSettingsFromOptions(config);
         });
     }
 
@@ -66,7 +66,7 @@ public static class InfisicalSecretsRepositoryTest
             var config = GenerateCompleteOptions();
             config.SiteUrl = string.Empty;
 
-            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+            _ = InfisicalSecretsRepository.ValidateSettingsFromOptions(config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl is not set."));
@@ -78,7 +78,7 @@ public static class InfisicalSecretsRepositoryTest
         var config = GenerateCompleteOptions();
         config.SiteUrl = "http://localhost:8080";
 
-        var settings = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+        var settings = InfisicalSecretsRepository.ValidateSettingsFromOptions(config);
 
         Assert.That(settings.SiteUrl, Is.EqualTo("http://localhost:8080"));
     }
@@ -94,7 +94,7 @@ public static class InfisicalSecretsRepositoryTest
             var config = GenerateCompleteOptions();
             config.SiteUrl = siteUrl;
 
-            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+            _ = InfisicalSecretsRepository.ValidateSettingsFromOptions(config);
         });
 
         Assert.That(e.Message, Is.EqualTo("SiteUrl must use HTTPS scheme"));
