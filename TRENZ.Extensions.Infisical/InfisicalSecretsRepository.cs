@@ -12,6 +12,20 @@ public class InfisicalSecretsRepository(
 {
     internal static ClientSettings CreateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
+        options.EnvironmentName ??= "development";
+        if (!options.DisableMappingToInfisicalStandardEnvironments.GetValueOrDefault())
+        {
+            switch (options.EnvironmentName.ToLowerInvariant())
+            {
+                case "development":
+                    options.EnvironmentName = "dev";
+                    break;
+                case "production":
+                    options.EnvironmentName = "prod";
+                    break;
+            }
+        }
+
         if (string.IsNullOrEmpty(options.ClientId))
             throw new InfisicalException("ClientId is not set.");
 
