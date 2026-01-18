@@ -30,8 +30,6 @@ public static class InfisicalSecretsRepositoryTest
             Assert.That(settings.ClientId, Is.EqualTo("clientId"));
             Assert.That(settings.ClientSecret, Is.EqualTo("clientSecret"));
             Assert.That(settings.SiteUrl, Is.EqualTo("https://siteurl"));
-            Assert.That(settings.Auth, Is.Null);
-            Assert.That(settings.SslCertificatePath, Is.Null);
         }
     }
 

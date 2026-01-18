@@ -15,7 +15,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
 
     private readonly InfisicalConfigurationOptions options;
 
-    private IDictionary<string, SecretElement> secrets = new Dictionary<string, SecretElement>();
+    private IDictionary<string, Secret> secrets = new Dictionary<string, Secret>();
 
     private CancellationTokenSource reloadTokenSource = new();
 
@@ -104,7 +104,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         }, LoadTimeout);
     }
 
-    private bool CheckHasChanged(IDictionary<string, SecretElement> newSecrets)
+    private bool CheckHasChanged(IDictionary<string, Secret> newSecrets)
     {
         var oldSecrets = secrets;
 
@@ -137,7 +137,7 @@ public class InfisicalConfigurationProvider : IConfigurationProvider, IDisposabl
         return false;
     }
 
-    private void LoadSecretsWithTimeout(Action<IDictionary<string, SecretElement>?> callback, TimeSpan timeout)
+    private void LoadSecretsWithTimeout(Action<IDictionary<string, Secret>?> callback, TimeSpan timeout)
     {
         logger?.LogTrace("Loading secrets with timeout {Timeout}", timeout);
 

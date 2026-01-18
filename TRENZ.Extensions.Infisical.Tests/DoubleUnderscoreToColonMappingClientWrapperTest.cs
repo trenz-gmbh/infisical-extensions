@@ -15,7 +15,7 @@ public static class DoubleUnderscoreToColonMappingClientWrapperTest
 
         innerMock
             .Setup(c => c.GetAllSecrets())
-            .Returns(new Dictionary<string, SecretElement> { { inputKey, new() } })
+            .Returns(new Dictionary<string, Secret> { { inputKey, new() } })
             .Verifiable();
 
         var mapper = new DoubleUnderscoreToColonMappingSecretsRepository(innerMock.Object);
@@ -35,7 +35,7 @@ public static class DoubleUnderscoreToColonMappingClientWrapperTest
 
         innerMock
             .Setup(c => c.GetAllSecrets())
-            .Returns(new Dictionary<string, SecretElement> { { "Foo", new() } }.ToFrozenDictionary())
+            .Returns(new Dictionary<string, Secret> { { "Foo", new() } }.ToFrozenDictionary())
             .Verifiable();
 
         var mapper = new DoubleUnderscoreToColonMappingSecretsRepository(innerMock.Object);
