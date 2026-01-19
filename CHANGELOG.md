@@ -1,6 +1,7 @@
 # Unreleased
 
 - Upgrade the Infisical SDK package to 3.0.4
+- In case loading secrets fails, the log message now contains the number of retries
 
 # 1.1.2
 

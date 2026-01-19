@@ -93,9 +93,10 @@ public class InfisicalSecretsRepository(
             }
             catch (InfisicalException e)
             {
-                logger?.LogInformation(e, "Failed to load secrets");
-
                 retries++;
+                
+                logger?.LogWarning(e, "Failed to load secrets, attempt #{Try}", retries);
+
                 if (retries >= maxRetries)
                 {
                     logger?.LogCritical(e, "Max retries exceeded");
