@@ -1,6 +1,7 @@
 # Unreleased
 
 - In case loading secrets fails, the log message now contains the number of retries
+- When authorization fails, we stop retrying and log the failure
 
 # 1.1.2
 
