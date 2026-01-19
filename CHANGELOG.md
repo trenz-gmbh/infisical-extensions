@@ -2,6 +2,7 @@
 
 - Map standard .Net environments 'Production' and 'Development' to 'prod' and 'dev' respectively,
   allowing users to bypass mapping with `DisableMappingToInfisicalStandardEnvironments`.
+- In case loading secrets fails, the log message now contains the number of retries
 
 # 1.1.2
 
