@@ -1,5 +1,7 @@
 # Unreleased
 
+- Upgrade the Infisical SDK package to 3.0.4
+
 # 1.1.2
 
 - Bump release
