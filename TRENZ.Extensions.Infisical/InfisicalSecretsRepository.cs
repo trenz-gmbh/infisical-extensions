@@ -97,6 +97,9 @@ public class InfisicalSecretsRepository(
             catch (Exception e)
             {
                 retries++;
+                
+                logger?.LogWarning(e, "Failed to load secrets, attempt #{Try}", retries);
+
                 if (retries >= maxRetries)
                 {
                     logger?.LogCritical(e, "Max retries exceeded");
@@ -105,12 +108,11 @@ public class InfisicalSecretsRepository(
                 }
             }
 
-                // can't use async here, see https://github.com/dotnet/runtime/issues/36018
+            // can't use async here, see https://github.com/dotnet/runtime/issues/36018
 
-                // back off exponentially but at least 50ms
-                var backoff = 50 + 5 * Math.Pow(2, retries);
-                Thread.Sleep((int)backoff);
-            }
+            // back off exponentially but at least 50ms
+            var backoff = 50 + 5 * Math.Pow(2, retries);
+            Thread.Sleep((int)backoff);            
         }
     }
 }
