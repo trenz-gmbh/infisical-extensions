@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using Infisical.Sdk;
+using Infisical.Sdk.Model;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
@@ -8,7 +9,7 @@ namespace TRENZ.Extensions.Infisical;
 public class InfisicalSecretsRepository(
     ILogger<InfisicalSecretsRepository>? logger,
     InfisicalConfigurationOptions options
-) : ISecretsRepository, IDisposable
+) : ISecretsRepository
 {
     internal static InfisicalConfigurationOptions ValidateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
@@ -67,19 +68,9 @@ public class InfisicalSecretsRepository(
         return client;
     }
 
-    private readonly InfisicalClient? client = GetClient(logger, options);
+    private readonly InfisicalClient client = GetClient(logger, options);
 
-    public void Dispose()
-    {
-        client.Dispose();
-
-        if (logger is IDisposable d)
-            d.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
-
-    public IDictionary<string, SecretElement>? GetAllSecrets()
+    public IDictionary<string, Secret>? GetAllSecrets()
     {
         var request = new ListSecretsOptions
         {
@@ -93,7 +84,8 @@ public class InfisicalSecretsRepository(
         {
             try
             {
-                return client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+                return client.Secrets().ListAsync(request)
+                    .GetAwaiter().GetResult().ToFrozenDictionary(s => s.SecretKey);
             }
             catch (InfisicalException e)
             {
