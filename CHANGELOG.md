@@ -1,5 +1,8 @@
 # Unreleased
 
+- Map standard .Net environments 'Production' and 'Development' to 'prod' and 'dev' respectively,
+  allowing users to bypass mapping with `DisableMappingToInfisicalStandardEnvironments`.
+
 # 1.1.2
 
 - Bump release

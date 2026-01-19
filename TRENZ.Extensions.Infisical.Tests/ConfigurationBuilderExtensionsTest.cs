@@ -14,7 +14,8 @@ public class ConfigureBuilderExtensionsTest
         string? accessToken = null,
         string? cacheTtl = null,
         string? userAgent = null,
-        string? pollingInterval = null)
+        string? pollingInterval = null,
+        bool disableMappingToInfisicalStandardEnvironments = false)
     {
         var dict = new Dictionary<string, string?>
         {
@@ -26,6 +27,7 @@ public class ConfigureBuilderExtensionsTest
             { "Infisical:CacheTtl", cacheTtl },
             { "Infisical:UserAgent", userAgent },
             { "Infisical:PollingInterval", pollingInterval },
+            { "Infisical:DisableMappingToInfisicalStandardEnvironments", disableMappingToInfisicalStandardEnvironments.ToString() },
         };
 
         return new ConfigurationBuilder()
@@ -136,7 +138,91 @@ public class ConfigureBuilderExtensionsTest
         });
 
         Assert.That(options, Is.Not.Null);
-        Assert.That(options!.EnvironmentName, Is.EqualTo("Test"));
+        Assert.That(options!.EnvironmentName, Is.EqualTo("test"));
+
+        builderMock.VerifyAll();
+    }
+
+    [Test]
+    public void TestEnvironmentNameMapsTraditionalNames()
+    {
+        var tempConfig = MockConfiguration();
+
+        var devEnvironmentMock = new Mock<IHostEnvironment>();
+        devEnvironmentMock
+            .Setup(e => e.EnvironmentName)
+            .Returns("Development")
+            .Verifiable();
+
+        var prodEnvironmentMock = new Mock<IHostEnvironment>();
+        prodEnvironmentMock
+            .Setup(e => e.EnvironmentName)
+            .Returns("Production")
+            .Verifiable();
+
+        var builderMock = new Mock<IConfigurationBuilder>();
+        builderMock
+            .Setup(b => b.Build())
+            .Returns(tempConfig)
+            .Verifiable();
+
+        InfisicalConfigurationOptions? devOptions = null;
+        InfisicalConfigurationOptions? prodOptions = null;
+        builderMock.Object.AddInfisical(devEnvironmentMock.Object, o =>
+        {
+            devOptions = o;
+        });
+        builderMock.Object.AddInfisical(prodEnvironmentMock.Object, o =>
+        {
+            prodOptions = o;
+        });
+
+        Assert.That(devOptions, Is.Not.Null);
+        Assert.That(devOptions!.EnvironmentName, Is.EqualTo("dev"));
+        Assert.That(prodOptions, Is.Not.Null);
+        Assert.That(prodOptions!.EnvironmentName, Is.EqualTo("prod"));
+
+        builderMock.VerifyAll();
+    }
+
+    [Test]
+    public void TestEnvironmentNameDoesntMapTraditionalNamesIfToldNotTo()
+    {
+        var tempConfig = MockConfiguration(disableMappingToInfisicalStandardEnvironments: true);
+
+        var devEnvironmentMock = new Mock<IHostEnvironment>();
+        devEnvironmentMock
+            .Setup(e => e.EnvironmentName)
+            .Returns("Development")
+            .Verifiable();
+
+        var prodEnvironmentMock = new Mock<IHostEnvironment>();
+        prodEnvironmentMock
+            .Setup(e => e.EnvironmentName)
+            .Returns("Production")
+            .Verifiable();
+
+        var builderMock = new Mock<IConfigurationBuilder>();
+        builderMock
+            .Setup(b => b.Build())
+            .Returns(tempConfig)
+            .Verifiable();
+
+        InfisicalConfigurationOptions? devOptions = null;
+        InfisicalConfigurationOptions? prodOptions = null;
+        builderMock.Object.AddInfisical(devEnvironmentMock.Object, o =>
+        {
+            devOptions = o;
+        });
+        builderMock.Object.AddInfisical(prodEnvironmentMock.Object, o =>
+        {
+            prodOptions = o;
+        });
+
+        Assert.That(devOptions, Is.Not.Null);
+        Assert.That(devOptions!.EnvironmentName, Is.EqualTo("development"));
+        Assert.That(prodOptions, Is.Not.Null);
+        Assert.That(prodOptions!.EnvironmentName, Is.EqualTo("production"));
 
         builderMock.VerifyAll();
     }
