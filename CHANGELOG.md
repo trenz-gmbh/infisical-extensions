@@ -1,5 +1,7 @@
 # Unreleased
 
+- Omitting the project ID will now throw
+
 # 1.1.2
 
 - Bump release
