@@ -73,6 +73,20 @@ public static class InfisicalSecretsRepositoryTest
     }
 
     [Test]
+    public static void TestConstructorThrowsIfProjectIdIsEmpty()
+    {
+        var e = Assert.Throws<InfisicalException>(() =>
+        {
+            var config = GenerateCompleteOptions();
+            config.ProjectId = string.Empty;
+
+            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+        });
+
+        Assert.That(e.Message, Is.EqualTo("ProjectId is not set."));
+    }
+
+    [Test]
     public static void TestSiteUrlAllowsHttpForLocalhost()
     {
         var config = GenerateCompleteOptions();

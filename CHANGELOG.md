@@ -2,6 +2,7 @@
 
 - In case loading secrets fails, the log message now contains the number of retries
 - When authorization fails, we stop retrying and log the failure
+- Omitting the project ID will now throw
 
 # 1.1.2
 
