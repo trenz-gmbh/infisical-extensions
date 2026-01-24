@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using Infisical.Sdk;
+using Infisical.Sdk.Model;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
@@ -8,9 +9,9 @@ namespace TRENZ.Extensions.Infisical;
 public class InfisicalSecretsRepository(
     ILogger<InfisicalSecretsRepository>? logger,
     InfisicalConfigurationOptions options
-) : ISecretsRepository, IDisposable
+) : ISecretsRepository
 {
-    internal static ClientSettings CreateSettingsFromOptions(InfisicalConfigurationOptions options)
+    internal static InfisicalConfigurationOptions ValidateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
         if (string.IsNullOrEmpty(options.ProjectId))
             throw new InfisicalException("ProjectId is not set.");
@@ -30,55 +31,54 @@ public class InfisicalSecretsRepository(
         if (givenSiteUrl.Scheme != "https" && givenSiteUrl.Host != "localhost")
             throw new InfisicalException("SiteUrl must use HTTPS scheme");
 
-        var sanitizedSiteUrl = new UriBuilder
-            {
-                Scheme = givenSiteUrl.Scheme,
-                Host = givenSiteUrl.Host,
-                Port = givenSiteUrl.Port,
-            }
+        options.SiteUrl = new UriBuilder
+        {
+            Scheme = givenSiteUrl.Scheme,
+            Host = givenSiteUrl.Host,
+            Port = givenSiteUrl.Port,
+        }
             .Uri
             .ToString()
             .TrimEnd('/'); // empty path results in trailing /
 
-        var settings = new ClientSettings
-        {
-            ClientId = options.ClientId,
-            ClientSecret = options.ClientSecret,
-            SiteUrl = sanitizedSiteUrl,
-            CacheTtl = options.CacheTtl,
-#nullable disable
-            // These properties are _not_ nullable in the Infisical SDK, but they _can_  be null in our config.
-            // This means we intentionally suppress nullable warnings here
-            UserAgent = options.UserAgent,
-            AccessToken = options.AccessToken,
-#nullable restore
-        };
-
-        return settings;
+        return options;
     }
 
-    private readonly InfisicalClient client = new(CreateSettingsFromOptions(options));
-
-    private readonly string projectId = options.ProjectId ?? throw new InfisicalException("ProjectId is not set.");
-
-    private readonly string environmentSlug = options.EnvironmentName.ToLowerInvariant();
-
-    public void Dispose()
+    private static InfisicalClient GetClient(ILogger? logger, InfisicalConfigurationOptions options)
     {
-        client.Dispose();
+        options = ValidateSettingsFromOptions(options); // ensure valid options
 
-        if (logger is IDisposable d)
-            d.Dispose();
+        var sdkSettings = new InfisicalSdkSettingsBuilder()
+            .WithHostUri(options.SiteUrl!)
+            .Build();
 
-        GC.SuppressFinalize(this);
+        var client = new InfisicalClient(sdkSettings);
+
+        try
+        {
+            logger?.LogDebug("Connecting to Infisical secrets instance at {Url}, environment {Environment}", 
+                options.SiteUrl, options.EnvironmentName);
+
+            client.Auth().UniversalAuth()
+                .LoginAsync(options.ClientId!, options.ClientSecret!)
+                .GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Failed to log into Infisical secrets instance.");
+        }
+
+        return client;
     }
 
-    public IDictionary<string, SecretElement>? GetAllSecrets()
+    private readonly InfisicalClient client = GetClient(logger, options);
+
+    public IDictionary<string, Secret>? GetAllSecrets()
     {
         var request = new ListSecretsOptions
         {
-            Environment = environmentSlug,
-            ProjectId = projectId,
+            EnvironmentSlug = options.EnvironmentName,
+            ProjectId = options.ProjectId,
         };
 
         const int maxRetries = 10;
@@ -87,7 +87,8 @@ public class InfisicalSecretsRepository(
         {
             try
             {
-                return client.ListSecrets(request).ToFrozenDictionary(s => s.SecretKey);
+                return client.Secrets().ListAsync(request)
+                    .GetAwaiter().GetResult().ToFrozenDictionary(s => s.SecretKey);
             }
             catch (InfisicalException e) 
                 when (e.InnerException != null && 
