@@ -23,6 +23,9 @@ public static class ConfigurationBuilderExtensions
         options.AccessToken = infisicalConfigSection["AccessToken"];
         options.CacheTtl = infisicalConfigSection["CacheTtl"] is { } cacheTtl ? long.Parse(cacheTtl) : null;
         options.UserAgent = infisicalConfigSection["UserAgent"];
+        options.DisableMappingToInfisicalStandardEnvironments = infisicalConfigSection["DisableMappingToInfisicalStandardEnvironments"] is { } disableMapping 
+            ? bool.Parse(disableMapping)
+            : null;
         options.PollingInterval = infisicalConfigSection["PollingInterval"] is { } pollingInterval
             ? long.Parse(pollingInterval)
             : null;
@@ -40,7 +43,23 @@ public static class ConfigurationBuilderExtensions
     {
         return builder.AddInfisical(loggerFactory, c =>
         {
-            c.EnvironmentName = environment.EnvironmentName;
+            c.EnvironmentName = environment.EnvironmentName.ToLowerInvariant();
+            if (string.IsNullOrEmpty(c.EnvironmentName)) {
+                c.EnvironmentName ??= "development";
+            }
+            
+            if (!c.DisableMappingToInfisicalStandardEnvironments.GetValueOrDefault())
+            {
+                switch (c.EnvironmentName.ToLowerInvariant())
+                {
+                    case "development":
+                        c.EnvironmentName = "dev";
+                        break;
+                    case "production":
+                        c.EnvironmentName = "prod";
+                        break;
+                }
+            }
 
             configure?.Invoke(c);
         });
