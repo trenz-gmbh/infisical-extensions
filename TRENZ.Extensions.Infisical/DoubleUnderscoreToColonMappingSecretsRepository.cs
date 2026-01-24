@@ -5,13 +5,13 @@ namespace TRENZ.Extensions.Infisical;
 
 public class DoubleUnderscoreToColonMappingSecretsRepository(ISecretsRepository inner) : ISecretsRepository
 {
-    public IDictionary<string, SecretElement>? GetAllSecrets()
+    public IDictionary<string, Secret>? GetAllSecrets()
     {
         var allSecrets = inner.GetAllSecrets();
         if (allSecrets == null)
             return null;
 
-        var newEntries = new Dictionary<string, SecretElement>();
+        var newEntries = new Dictionary<string, Secret>();
         foreach (var key in allSecrets.Keys)
         {
             if (!key.Contains("__"))

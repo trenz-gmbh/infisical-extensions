@@ -1,5 +1,6 @@
 # Unreleased
 
+- Upgrade the Infisical SDK package to 3.0.4
 - In case loading secrets fails, the log message now contains the number of retries
 - When authorization fails, we stop retrying and log the failure
 - Omitting the project ID will now throw
