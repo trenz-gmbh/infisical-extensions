@@ -9,7 +9,7 @@ namespace TRENZ.Extensions.Infisical;
 public class InfisicalSecretsRepository(
     ILogger<InfisicalSecretsRepository>? logger,
     InfisicalConfigurationOptions options
-) : ISecretsRepository
+) : ISecretsRepository, IDisposable
 {
     internal static InfisicalConfigurationOptions ValidateSettingsFromOptions(InfisicalConfigurationOptions options)
     {
@@ -69,6 +69,16 @@ public class InfisicalSecretsRepository(
         }
 
         return client;
+    }
+
+    public void Dispose()
+    {
+        client.Dispose();
+
+        if (logger is IDisposable d)
+            d.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     private readonly InfisicalClient client = GetClient(logger, options);
