@@ -78,7 +78,7 @@ public static class InfisicalSecretsRepositoryTest
             var config = GenerateCompleteOptions();
             config.ProjectId = string.Empty;
 
-            _ = InfisicalSecretsRepository.CreateSettingsFromOptions(config);
+            _ = InfisicalSecretsRepository.ValidateSettingsFromOptions(config);
         });
 
         Assert.That(e.Message, Is.EqualTo("ProjectId is not set."));
