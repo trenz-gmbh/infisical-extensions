@@ -73,7 +73,8 @@ public class InfisicalSecretsRepository(
 
     public void Dispose()
     {
-        client.Dispose();
+        if (client is IDisposable c)
+            c.Dispose();
 
         if (logger is IDisposable d)
             d.Dispose();
