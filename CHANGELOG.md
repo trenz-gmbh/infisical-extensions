@@ -1,5 +1,7 @@
 # Unreleased
 
+- Map standard .Net environments 'Production' and 'Development' to 'prod' and 'dev' respectively,
+  allowing users to bypass mapping with `DisableMappingToInfisicalStandardEnvironments`.
 - In case loading secrets fails, the log message now contains the number of retries
 - When authorization fails, we stop retrying and log the failure
 - Omitting the project ID will now throw

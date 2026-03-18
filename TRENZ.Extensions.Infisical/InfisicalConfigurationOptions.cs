@@ -23,4 +23,6 @@ public class InfisicalConfigurationOptions
     public long? LoadTimeout { get; set; }
 
     public bool? DisableDoubleUnderscoreToColonMapping { get; set; }
+
+    public bool? DisableMappingToInfisicalStandardEnvironments { get; set; }
 }
